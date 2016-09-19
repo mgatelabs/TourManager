@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Common Template</title>
+</head>
+<body>
+
+<div th:fragment="header (selected)">
+
+</div>
+
+
+<div th:fragment="list">
+    <script type="text/javascript" th:src="@{/static/js/list.js}"></script>
+
+    <table class="table table-condensed table-striped" id="listTable">
+        <thead>
+            <tr>
+                <th>Name (Identifier)</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+    <div id="rowContainer" class="container-fluid">
+
+    </div>
+
+</div>
+
+<div th:fragment="editor">
+    <script type="text/javascript" th:src="@{/static/js/edit.js}"></script>
+    <input type="hidden" id="tourIdentifier" th:value="${tourIdentifier}"/>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist" id="tabList">
+            <li role="presentation" class="active"><a href="#tourInfo" aria-controls="tourInfo" role="tab" data-toggle="tab">Information</a></li>
+            <li role="presentation"><a href="#roomList" aria-controls="roomList" role="tab" data-toggle="tab">Rooms</a></li>
+            <li role="presentation" id="roomEditLink"><a href="#roomEditor" aria-controls="roomEditor" role="tab" data-toggle="tab">Room Editor</a></li>
+            <li role="presentation" id="pointListLink"><a href="#pointList" aria-controls="pointList" role="tab" data-toggle="tab">Points</a></li>
+            <li role="presentation" id="pointEditLink"><a href="#pointEditor" aria-controls="pointEditor" role="tab" data-toggle="tab">Point Editor</a></li>
+            <li role="presentation"><a href="#mediaEditor" aria-controls="mediaEditor" role="tab" data-toggle="tab">Images</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="tourInfo">
+
+                <form>
+                    <div class="form-group">
+                        <label for="tourName">Name</label>
+                        <input type="text" class="form-control" id="tourName" placeholder="Name"/>
+                    </div>
+                </form>
+
+            </div>
+            <div role="tabpanel" class="tab-pane" id="roomList">
+
+                <table class="table table-condensed table-striped" id="roomTable">
+                    <thead>
+                    <tr>
+                        <th>Name (Identifier)</th>
+                        <th>Options</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+            </div>
+            <div role="tabpanel" class="tab-pane" id="roomEditor">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Room Information</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <label for="roomName">Name</label>
+                            <input type="text" class="form-control" id="roomName" placeholder="Name"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roomContent">Content</label>
+                            <select class="form-control" id="roomContent"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roomPlaybackType">Playback Type</label>
+                            <select class="form-control" id="roomPlaybackType">
+                                <option value="360">2D 360 (Default)</option>
+                                <option value="360lr">3D 360 Left Right</option>
+                                <option value="360tb">3D 360 Top Bottom</option>
+                                <option value="2d">2D Flat</option>
+                                <option value="lr">3D Flat Left Right</option>
+                                <option value="rl">3D Flat Right left</option>
+                                <option value="tb">3D Flat Top Bottom</option>
+                                <option value="180">2D 180</option>
+                                <option value="180lr">3D 180 Left Right</option>
+                                <option value="180tb">3D 180 Top Bottom</option>
+                                <option value="ffd">2D Front Full Dome</option>
+                                <option value="ffdlr">3D Front Full Dome Left Right</option>
+                                <option value="ffdtb">3D Front Full Dome Top Bottom</option>
+                                <option value="cube">2D Cube</option>
+                                <option value="cubelr">3D Cube Left Right</option>
+                                <option value="cubetb">3D Cube Top Bottom</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="pointList">
+
+                <table class="table table-condensed table-striped" id="pointTable">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Action</th>
+                        <th>Options</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="pointEditor">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Point Information</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <label for="pointTitle">Title</label>
+                            <input type="text" class="form-control" id="pointTitle" placeholder="Title"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointType">Type</label>
+                            <select class="form-control" id="pointType">
+                                <option value="rot">Rotation (Default)</option>
+                                <option value="point">Point (Advanced)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointAction">Action</label>
+                            <select class="form-control" id="pointAction">
+                                <option value="nav">Navigate</option>
+                                <option value="stop">Stop Tour</option>
+                                <option value="exit">Exit VR</option>
+                                <!--<option value="list">List</option>-->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointTo">To</label>
+                            <select class="form-control" id="pointTo"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointIcon">Icon</label>
+                            <select class="form-control" id="pointIcon">
+                                <option value="dot">Dot</option>
+                                <option value="eye">Eye</option>
+                                <option value="exit">Exit</option>
+                                <option value="stop">Stop</option>
+                                <option value="up">Up</option>
+                                <option value="down">Down</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                                <option value="previous">Previous</option>
+                                <option value="next">Next</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointRecenter">Recenter</label>
+                            <select class="form-control" id="pointRecenter">
+                                <option value="true">True</option>
+                                <option value="false">false</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointSize">Size</label>
+                            <input type="number" class="form-control" id="pointSize" placeholder="Size" min="0.25" max="10" step="0.1"/>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Rotation</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <label for="pointRotY">Yaw</label>
+                            <input type="number" class="form-control rotBased" id="pointRotY" placeholder="Yaw" min="-180" max="180" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointRotP">Pitch</label>
+                            <input type="number" class="form-control rotBased" id="pointRotP" placeholder="Pitch" min="-90" max="90" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointRotD">Depth</label>
+                            <input type="number" class="form-control rotBased" id="pointRotD" placeholder="Depth" min="1.5" max="10" step="0.1"/>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Point</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <label for="pointX">X</label>
+                            <input type="number" class="form-control rotBased" id="pointX" placeholder="Yaw" min="-50" max="50" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointY">Y</label>
+                            <input type="number" class="form-control rotBased" id="pointY" placeholder="Pitch" min="-50" max="50" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointZ">Z</label>
+                            <input type="number" class="form-control rotBased" id="pointZ" placeholder="Pitch" min="-50" max="50" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointXrot">X Rotation</label>
+                            <input type="number" class="form-control rotBased" id="pointXrot" placeholder="X Rotation" min="-180" max="180" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointYrot">Y Rotation</label>
+                            <input type="number" class="form-control rotBased" id="pointYrot" placeholder="Y Rotation" min="-180" max="180" step="0.1"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointZrot">Z Rotation</label>
+                            <input type="number" class="form-control rotBased" id="pointZrot" placeholder="Z Rotation" min="-180" max="180" step="0.1"/>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="mediaEditor">
+
+                <table class="table table-condensed table-striped" id="mediaTable">
+                    <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Display</th>
+                        <th>Preview</th>
+                        <th>Options</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function(){
+            MG.edit.start($('#tourIdentifier').val());
+        });
+    </script>
+
+</div>
+
+</body>
+</html>
