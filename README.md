@@ -50,22 +50,24 @@ This is very basic at the moment, it only supports loading in the *.tour folders
           playback: '360' || '360lr' || '360tb' || '2d' || 'lr' || 'rl' || '180' || '180lr' || '180tb',
           content: 'filename',
           points: [
-            title: 'Display name',
-            type: 'rot' || 'point',
-            action: 'nav' || 'exit' || 'stop',
-            to: 'room identifier', // when action == 'nav'
-            recenter: true || false, // true to reset view
-            yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
-            pitch: FLOAT, // when type == 'rot'. -90 - 90. Up = +.  0 will default.
-            depth: FLOAT, // when type == 'rot'. 1.5 - 10. 1.5 will default.
-            size: FLOAT, // when type == 'rot'. 1.0 - 10.  1.0 will default.
-            x: FLOAT, // when type == 'point'.
-            y: FLOAT, // when type == 'point'.
-            z: FLOAT, // when type == 'point'.
-            xrot: FLOAT, // when type == 'point'.
-            yrot: FLOAT, // when type == 'point'.
-            zrot: FLOAT // when type == 'point'.
-          ], ...
+            {
+                title: 'Display name',
+                type: 'rot' || 'point',
+                action: 'nav' || 'exit' || 'stop',
+                to: 'room identifier', // when action == 'nav'
+                recenter: true || false, // true to reset view
+                yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
+                pitch: FLOAT, // when type == 'rot'. -90 - 90. Up = +.  0 will default.
+                depth: FLOAT, // when type == 'rot'. 1.5 - 10. 1.5 will default.
+                size: FLOAT, // when type == 'rot'. 1.0 - 10.  1.0 will default.
+                x: FLOAT, // when type == 'point'.
+                y: FLOAT, // when type == 'point'.
+                z: FLOAT, // when type == 'point'.
+                xrot: FLOAT, // when type == 'point'.
+                yrot: FLOAT, // when type == 'point'.
+                zrot: FLOAT // when type == 'point'.
+            }, ...
+          ]
         }, ...
       ]
     }
