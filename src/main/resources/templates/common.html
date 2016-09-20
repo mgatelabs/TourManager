@@ -235,17 +235,17 @@
 
                         <div class="form-group">
                             <label for="pointX">X</label>
-                            <input type="number" class="form-control rotBased" id="pointX" placeholder="Yaw" min="-50" max="50" step="0.1"/>
+                            <input type="number" class="form-control rotBased" id="pointX" placeholder="X" min="-50" max="50" step="0.1"/>
                         </div>
 
                         <div class="form-group">
                             <label for="pointY">Y</label>
-                            <input type="number" class="form-control rotBased" id="pointY" placeholder="Pitch" min="-50" max="50" step="0.1"/>
+                            <input type="number" class="form-control rotBased" id="pointY" placeholder="Y" min="-50" max="50" step="0.1"/>
                         </div>
 
                         <div class="form-group">
                             <label for="pointZ">Z</label>
-                            <input type="number" class="form-control rotBased" id="pointZ" placeholder="Pitch" min="-50" max="50" step="0.1"/>
+                            <input type="number" class="form-control rotBased" id="pointZ" placeholder="Z" min="-50" max="50" step="0.1"/>
                         </div>
 
                         <div class="form-group">
@@ -287,12 +287,41 @@
             </div>
         </div>
     </div>
-
     <script type="text/javascript">
         $(function(){
             MG.edit.start($('#tourIdentifier').val());
         });
     </script>
+</div>
+
+<div th:fragment="create">
+    <script type="text/javascript" th:src="@{/static/js/create.js}"></script>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Point</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label for="tourTitle">Title</label>
+                <input type="text" class="form-control" id="tourTitle" placeholder="Name"/>
+            </div>
+
+            <div class="alert alert-info" role="alert">The identifier is only used to generate the folder, which will be hidden by the title</div>
+
+            <div class="form-group">
+                <label for="tourId">Identifier</label>
+                <input type="text" class="form-control" id="tourId" placeholder="Unique Identifier"/>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="...">
+                <button type="button" class="btn btn-primary" onclick="MG.create.save()">Save</button>
+                <button type="button" class="btn btn-warning" onclick="MG.create.clear()">Clear</button>
+            </div>
+
+        </div>
+    </div>
 
 </div>
 

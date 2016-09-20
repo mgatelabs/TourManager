@@ -14,7 +14,7 @@ import javax.ws.rs.GET;
 public class EditController {
 
     @GET
-    @RequestMapping("/edit/{tour:[a-zA-Z0-9]+\\.tour}/")
+    @RequestMapping("/edit/{tour:[a-z0-9-_]+\\.tour}/")
     String edit(Model model, @PathVariable("tour") String tourIdentifier) {
 
         model.addAttribute("bodyTemplate", "editor");
