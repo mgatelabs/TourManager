@@ -1,4 +1,4 @@
-package com.mgatelabs.tourmanager.controllers;
+package com.mgatelabs.tourmanager.components;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mgatelabs.tourmanager.entities.TourDefinition;
@@ -17,7 +17,7 @@ import java.io.FileFilter;
  */
 @Component
 @Path("/tours")
-public class TourListController {
+public class TourListComponent {
 
     @Path("/list")
     @GET

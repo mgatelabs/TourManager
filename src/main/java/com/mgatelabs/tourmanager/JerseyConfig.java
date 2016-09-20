@@ -1,7 +1,7 @@
 package com.mgatelabs.tourmanager;
 
-import com.mgatelabs.tourmanager.controllers.ResourceComponent;
-import com.mgatelabs.tourmanager.controllers.TourListController;
+import com.mgatelabs.tourmanager.components.ResourceComponent;
+import com.mgatelabs.tourmanager.components.TourListComponent;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +14,7 @@ import javax.ws.rs.ApplicationPath;
 @ApplicationPath("/rest")
 public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
-        register(TourListController.class);
+        register(TourListComponent.class);
         register(ResourceComponent.class);
     }
 }

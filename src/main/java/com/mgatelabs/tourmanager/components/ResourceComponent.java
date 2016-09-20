@@ -1,4 +1,4 @@
-package com.mgatelabs.tourmanager.controllers;
+package com.mgatelabs.tourmanager.components;
 
 import com.mgatelabs.tourmanager.entities.TourInfo;
 import com.mgatelabs.tourmanager.entities.TourItem;
