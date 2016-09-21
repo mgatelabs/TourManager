@@ -11,17 +11,15 @@
 
         if (identifier.match(/^[a-z0-9-_]+$/g)) {
             if (title) {
-
+                MG.common.beforeHandler();
                 $.post( "/rest/resource/tour/create", {tourTitle: title, tourIdentifier: identifier}, function( data ) {
                   if (data.code == 'OK') {
                     // Created, switch to edit
                     window.location = '/edit/' + identifier + ".tour/"
                   } else {
-                    // Exceptions
+                    MG.common.errorHandler(data);
                   }
                 });
-
-
             } else {
                 alert('Please specify a tour title.');
             }

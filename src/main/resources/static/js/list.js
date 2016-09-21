@@ -20,11 +20,12 @@
                 case 'DELETE': {
                     var i = ref.attr('index'), identifier = ref.attr('identifier');
                     if (confirm('Delete tour: ' + identifier + ', are you sure?')) {
+                        MG.common.beforeHandler();
                         $.post( "/rest/resource/tour/delete", {tourIdentifier: identifier}, function( data ) {
                           if (data.code == 'OK') {
                             $('tr[i='+i+']').remove();
                           } else {
-                            // Exceptions
+                            MG.common.errorHandler(data);
                           }
                         });
 
@@ -33,6 +34,8 @@
             }
         });
     };
+
+    MG.common.beforeHandler();
 
     ns.load = function() {
         $.getJSON( '/rest/tours/list', {

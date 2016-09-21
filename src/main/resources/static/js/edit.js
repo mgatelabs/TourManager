@@ -205,10 +205,6 @@
             }
         });
 
-        // GO
-
-        $('#roomEditLink,#pointListLink,#pointEditLink').addClass('disabled');
-
         ns.tourId = tourId;
 
         // anchors
@@ -239,6 +235,7 @@
         ns.media = [];
 
         var rnd = new Date().getTime();
+        MG.common.beforeHandler();
         $.getJSON( '/rest/resource/' + ns.tourId + '/info', {
             time: rnd
         }).done(function(data){
@@ -264,8 +261,9 @@
                         ns.media.push(ns.readTourItem(data.items[i], {json:{"playbackType" : 4, "type" : 2, "display" : "Untitled", "position" : 0, "rememberPosition" : 0}}));
                     }
                 }
+            } else {
+                MG.common.errorHandler(data);
             }
-
             ns.refresh();
         });
     };
@@ -404,7 +402,6 @@
 
         ns.deSelectPoint();
 
-        $('#roomEditLink,#pointListLink').removeClass('disabled');
         $('#pointEditLink').addClass('disabled');
 
         ns.roomName.prop('disabled', false).val(ns.currentRoom.title);
@@ -420,7 +417,7 @@
 
         ns.deSelectPoint();
 
-        $('#roomEditLink,#pointListLink,#pointEditLink').addClass('disabled');
+        $('#pointEditLink').addClass('disabled');
 
         ns.roomName.prop('disabled', true).val('');
         ns.roomContent.prop('disabled', true).val([]);
