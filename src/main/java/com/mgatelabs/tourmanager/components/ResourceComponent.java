@@ -30,6 +30,7 @@ public class ResourceComponent {
     public static final File toursFolder =  new File("." + File.separator + "Tours" + File.separator);
 
     public static final Pattern TOUR_IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9-_]+$");
+    public static final Pattern TOUR_FULL_PATTERN = Pattern.compile("^[a-z0-9-_]+.tour$");
 
     @POST
     @Path("/tour/create")
@@ -98,6 +99,66 @@ public class ResourceComponent {
             targetFolder.mkdir();
             objectMapper.writeValue(targetJson, jsonPieces);
             objectMapper.writeValue(indexFile, indexPieces);
+        } catch (Exception ex) {
+            ending.setCode(RestResponseCodes.ERROR);
+            ending.addMessage(ex.toString());
+            ex.printStackTrace();
+        }
+
+        return ending;
+    }
+
+    @POST
+    @Path("/tour/delete")
+    @Produces("application/json")
+    public BaseRestResponse deleteTour(@FormParam("tourIdentifier") String tourIdentifier) {
+
+        if (tourIdentifier == null) {
+            BaseRestResponse missing = new BaseRestResponse();
+            missing.setCode(RestResponseCodes.ERROR);
+            missing.addMessage("A required parameter was not provided.");
+            return missing;
+        }
+        tourIdentifier = tourIdentifier.trim();
+
+        if (tourIdentifier.isEmpty()) {
+            BaseRestResponse missing = new BaseRestResponse();
+            missing.setCode(RestResponseCodes.ERROR);
+            missing.addMessage("A required parameter was empty.");
+            return missing;
+        }
+
+        // Ensure tourIdentifier is correct
+        Matcher m = TOUR_FULL_PATTERN.matcher(tourIdentifier);
+        if(!m.matches()) {
+            BaseRestResponse missing = new BaseRestResponse();
+            missing.setCode(RestResponseCodes.ERROR);
+            missing.addMessage("Tour identifier is invalid.");
+            return missing;
+        }
+
+        BaseRestResponse ending = new BaseRestResponse();
+
+        final File targetFolder = new File(toursFolder, tourIdentifier);
+        final File targetJson = new File(toursFolder, tourIdentifier + ".json");
+        final File targetPreview = new File(toursFolder, tourIdentifier + ".png");
+
+        try {
+            boolean deleted = true;
+            if (targetPreview.exists()) {
+                deleted &= targetPreview.delete();
+            }
+            if (targetJson.exists()) {
+                deleted &= targetJson.delete();
+            }
+            if (targetFolder.exists()) {
+                deleted &= deleteDir(targetFolder);
+            }
+
+            if (!deleted) {
+                ending.setCode(RestResponseCodes.ERROR);
+                ending.addMessage("Could not delete tour");
+            }
         } catch (Exception ex) {
             ending.setCode(RestResponseCodes.ERROR);
             ending.addMessage(ex.toString());
@@ -224,5 +285,17 @@ public class ResourceComponent {
             }
         }
         return "";
+    }
+
+    private boolean deleteDir(File file) {
+        boolean success = true;
+        final File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                success &= deleteDir(f);
+            }
+        }
+        success &= file.delete();
+        return success;
     }
 }

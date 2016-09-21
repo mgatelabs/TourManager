@@ -17,6 +17,19 @@
                     var href = ref.attr('href');
                     window.location = href;
                 } break;
+                case 'DELETE': {
+                    var i = ref.attr('index'), identifier = ref.attr('identifier');
+                    if (confirm('Delete tour: ' + identifier + ', are you sure?')) {
+                        $.post( "/rest/resource/tour/delete", {tourIdentifier: identifier}, function( data ) {
+                          if (data.code == 'OK') {
+                            $('tr[i='+i+']').remove();
+                          } else {
+                            // Exceptions
+                          }
+                        });
+
+                    }
+                } break;
             }
         });
     };
@@ -30,12 +43,17 @@
             if (data.code == 'OK') {
                 for (i = 0; i < data.items.length; i++) {
                     item = data.items[i];
-                    tr = $('<tr></tr>').appendTo( ns.listBody);
+                    tr = $('<tr></tr>').attr('i', i).appendTo( ns.listBody);
                     $('<td></td>').text(item.name + ' (' + item.identifier + ')').appendTo(tr);
                     td = $('<td></td>').appendTo(tr);
 
                     link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'EDIT').appendTo(td);
                     link.attr('href', '/edit/' + item.identifier + '/?time=' + rnd);
+                    link.attr('title', 'Edit Tour');
+
+                    link = $('<button type="button" style="margin-right:4px;" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
+                    link.attr('identifier', item.identifier);
+                    link.attr('title', 'Delete Tour');
                 }
             }
         });
