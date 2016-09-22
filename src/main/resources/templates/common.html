@@ -35,6 +35,7 @@
 <div th:fragment="editor">
     <script type="text/javascript" th:src="@{/static/js/edit.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/three.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/edit.preview.js}"></script>
     <input type="hidden" id="tourIdentifier" th:value="${tourIdentifier}"/>
     <div>
         <!-- Nav tabs -->
@@ -155,7 +156,7 @@
                             <div class="panel-heading">
                                 <h3 class="panel-title">Preview</h3>
                             </div>
-                            <div class="panel-body">
+                            <div class="panel-body" id="previewPanel" style="height:480px;margin:0;padding:0;">
 
 
                             </div>
@@ -334,6 +335,14 @@
     <script type="text/javascript">
         $(function(){
             MG.edit.start($('#tourIdentifier').val());
+
+            new MG.preview.Preview({container:$('#previewPanel')});
+
+            $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', function(){
+                MG.preview.instance.onWindowResize();
+                MG.preview.instance.changeBackground(MG.edit.getBackgroundUrl());
+                MG.preview.instance.update();
+            });
         });
     </script>
 </div>

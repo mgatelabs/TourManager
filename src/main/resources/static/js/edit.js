@@ -518,4 +518,11 @@
         ns.currentRoom.points.splice(pointIndex - 1, 0, toRemove);
     };
 
+    ns.getBackgroundUrl = function(){
+        if (ns.currentPoint && ns.currentRoom && ns.currentRoom.content) {
+            return "/rest/resource/" + ns.tourId + '/' + ns.currentRoom.content;
+        }
+        return "";
+    }
+
 }());
