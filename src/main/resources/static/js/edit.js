@@ -17,6 +17,10 @@
             ns.definition.json.display = $(this).val();
         });
 
+        $('#save').click(function(){
+            ns.save();
+        });
+
         // Room List
         ns.roomBody = $('#roomTable tbody');
 
@@ -61,6 +65,24 @@
         ns.roomPlaybackType.change(function(){
             if (ns.currentRoom) {
                 ns.currentRoom.playback = $(this).val();
+            }
+        });
+
+        $('#newRoom').click(function(){
+            var roomId = prompt("New room identifier:");
+            if (roomId) {
+                for (i = 0; i < ns.index.json.rooms.length; i++) {
+                    item = ns.index.json.rooms[i];
+                    if (item.id == roomId) {
+                        alert('Room with matching identifier already exists');
+                        return;
+                    }
+                }
+                ns.index.json.rooms.push({"id":roomId, "title":roomId, "content":"","points":[]});
+
+                ns.updateRoomList();
+
+                ns.selectRoom(ns.index.json.rooms.length - 1);
             }
         });
 
@@ -223,7 +245,7 @@
             var j = JSON.parse(data.json);
             data.json = $.extend(true, {}, baseData.json, j);
         } else {
-            return baseData;
+            return $.extend(true, {}, baseData, data);
         }
         return data;
     };
@@ -267,6 +289,33 @@
             ns.refresh();
         });
     };
+
+    ns.verify = function() {
+        var result = {errors:[]};
+
+
+
+        return result;
+    }
+
+    ns.save = function() {
+        var verifyResults = ns.verify();
+        if (verifyResults.errors && verifyResults.errors.length > 0) {
+            // Error handler
+        } else {
+            // Go
+            $.post( "/rest/resource/" + ns.tourId + '/info', {info: JSON.stringify(ns.index.json)}, function( data ) {
+              if (data.code == 'OK') {
+                // Created, switch to edit
+
+
+
+              } else {
+                MG.common.errorHandler(data);
+              }
+            });
+        }
+    },
 
     ns.refresh = function(){
         var i, item, tr, td;
@@ -391,7 +440,7 @@
         for (i = 0; i < ns.media.length; i++) {
             item = ns.media[i];
             option = $('<option></option>').appendTo(ns.roomContent);
-            option.text(item.json.display);
+            option.text(item.json.display || item.name);
             option.attr('value',item.name);
         }
     };

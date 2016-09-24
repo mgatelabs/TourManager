@@ -1,5 +1,6 @@
 package com.mgatelabs.tourmanager.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.sun.istack.internal.NotNull;
 
@@ -33,6 +34,16 @@ public class BaseRestResponse {
     }
 
     public void addMessage(@NotNull String msg) {
+        messages.add(msg);
+    }
+
+    @JsonIgnore
+    public boolean isSuccessful() {
+        return code == RestResponseCodes.OK;
+    }
+
+    public void addError(@NotNull String msg) {
+        setCode(RestResponseCodes.ERROR);
         messages.add(msg);
     }
 }

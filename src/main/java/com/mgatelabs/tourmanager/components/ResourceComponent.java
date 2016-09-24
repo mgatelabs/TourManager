@@ -1,22 +1,24 @@
 package com.mgatelabs.tourmanager.components;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mgatelabs.tourmanager.entities.TourInfo;
 import com.mgatelabs.tourmanager.entities.TourItem;
 import com.mgatelabs.tourmanager.entities.TourItemType;
 import com.mgatelabs.tourmanager.rest.BaseRestResponse;
 import com.mgatelabs.tourmanager.rest.RestResponseCodes;
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,10 +29,11 @@ import java.util.regex.Pattern;
 @Path("/resource")
 public class ResourceComponent {
 
-    public static final File toursFolder =  new File("." + File.separator + "Tours" + File.separator);
+    public static final File toursFolder = new File("." + File.separator + "Tours" + File.separator);
 
     public static final Pattern TOUR_IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9-_]+$");
     public static final Pattern TOUR_FULL_PATTERN = Pattern.compile("^[a-z0-9-_]+.tour$");
+    public static final Pattern TOUR_FLOAT = Pattern.compile("^[0-9]*(\\.[0-9]+){0,1}$");
 
     @POST
     @Path("/tour/create")
@@ -55,7 +58,7 @@ public class ResourceComponent {
 
         // Ensure tourIdentifier is correct
         Matcher m = TOUR_IDENTIFIER_PATTERN.matcher(tourIdentifier);
-        if(!m.matches()) {
+        if (!m.matches()) {
             BaseRestResponse missing = new BaseRestResponse();
             missing.setCode(RestResponseCodes.ERROR);
             missing.addMessage("Tour identifier is invalid.");
@@ -130,7 +133,7 @@ public class ResourceComponent {
 
         // Ensure tourIdentifier is correct
         Matcher m = TOUR_FULL_PATTERN.matcher(tourIdentifier);
-        if(!m.matches()) {
+        if (!m.matches()) {
             BaseRestResponse missing = new BaseRestResponse();
             missing.setCode(RestResponseCodes.ERROR);
             missing.addMessage("Tour identifier is invalid.");
@@ -225,6 +228,175 @@ public class ResourceComponent {
         return tourInfo;
     }
 
+    private static final ImmutableSet<String> LIST_POINT_TYPE = ImmutableSet.of("rot", "point");
+    private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next");
+    private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit");
+    private static final ImmutableSet<String> LIST_TRUE_FALSE = ImmutableSet.of("true", "false");
+    private static final ImmutableSet<String> LIST_ROOM_PLAYBACK = ImmutableSet.of("360","360lr","360tb","2d","lr","rl","tb", "180","180lr","180tb","ffd","ffdlr","ffdtb","cube","cubelr","cubetb");
+    private static final ImmutableSet<String> ATTRS_FOR_ROT = ImmutableSet.of("yaw", "pitch", "depth", "size");
+    private static final ImmutableSet<String> ATTRS_FOR_POINT = ImmutableSet.of("x", "y", "z", "xrot", "yrot", "zrot", "size");
+
+
+    @POST
+    @Path("/{tour:[a-z0-9-_]+\\.tour}/info")
+    @Produces("application/json")
+    public BaseRestResponse postTourInfo(@PathParam("tour") String tour, @FormParam("info") String jsonStr) {
+        BaseRestResponse restResponse = new BaseRestResponse();
+
+        // Verify response
+        final ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            JsonNode rootNode = mapper.readTree(jsonStr);
+
+            // Verify JSON Integrity
+            JsonNode major = getNode(rootNode, "version.major");
+            if (!getValueFrom(major).equals("1")) {
+                restResponse.addError("Invalid version major number.  Expected value 1. @ Path (version.major)");
+            }
+            JsonNode minor = getNode(rootNode, "version.minor");
+            if (!getValueFrom(minor).equals("0")) {
+                restResponse.addError("Invalid version minor number.  Expected value 0. @ Path (version.major)");
+            }
+            JsonNode rooms = getNode(rootNode, "rooms");
+            if (rooms == null || rooms.size() == 0) {
+                restResponse.addError("Invalid room list.  In order to save, you must define at least one room. @ Path (rooms)");
+            } else {
+                // Verify each room
+                for (int i = 0; i < rooms.size(); i++) {
+                    JsonNode room = rooms.get(i);
+                    if (room == null) {
+                        restResponse.addError("Missing room definition.  @ Path (rooms[" + i + "])");
+                    } else {
+                        JsonNode roomId = getNode(room, "id");
+                        if (StringUtils.isEmpty(getValueFrom(roomId))) {
+                            restResponse.addError("Invalid room identifier.  Room id is required. @ Path (rooms[" + i + "].id)");
+                        }
+                        JsonNode roomTitle = getNode(room, "title");
+                        if (StringUtils.isEmpty(getValueFrom(roomTitle))) {
+                            restResponse.addError("Invalid room title.  Room title is required. @ Path (rooms[" + i + "].title)");
+                        }
+                        JsonNode roomContent = getNode(room, "content");
+                        if (StringUtils.isEmpty(getValueFrom(roomContent))) {
+                            restResponse.addError("Invalid room content.  Room content is required. @ Path (rooms[" + i + "].content)");
+                        }
+                        String playbackType = getValueFrom(getNode(room, "playback"));
+                        if (!StringUtils.isEmpty(playbackType) && !LIST_ROOM_PLAYBACK.contains(playbackType)) {
+                            restResponse.addError("Invalid room playback type.  @ Path (rooms[" + i + "].playback)");
+                        }
+                        JsonNode roomPoints = getNode(room, "points");
+                        if (roomPoints == null || roomPoints.size() == 0) {
+                            restResponse.addError("Invalid point list.  A room must define at least one point. @ Path (rooms[" + i + "].points)");
+                        } else {
+                            for (int j = 0; j < rooms.size(); j++) {
+                                JsonNode point = roomPoints.get(j);
+
+                                JsonNode pointTitle = getNode(point, "title");
+                                if (StringUtils.isEmpty(getValueFrom(pointTitle))) {
+                                    restResponse.addError("Invalid point title.  Point title is required. @ Path (rooms[" + i + "].points[" + j + "].title)");
+                                }
+
+                                String pointType = getValueFrom(getNode(point, "type"));
+                                if (StringUtils.isEmpty(pointType)) {
+                                    restResponse.addError("Invalid point type.  Point type is required. @ Path (rooms[" + i + "].points[" + j + "].type)");
+                                } else if (!LIST_POINT_TYPE.contains(pointType)) {
+                                    restResponse.addError("Invalid point type.  Provided type value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].type)");
+                                } else {
+                                    Set<String> checkAgainst = pointType.equals("nav") ? ATTRS_FOR_ROT : ATTRS_FOR_POINT;
+
+                                    for (String attributeName : checkAgainst) {
+                                        JsonNode pointValue = getNode(point, attributeName);
+                                        if (!isEmptyOrFloat(getValueFrom(pointValue))) {
+                                            restResponse.addError("Invalid point " + attributeName + ".  Provided " + attributeName + " value was not a valid decimal.  Acceptable formats include ## or #.# or .##. @ Path (rooms[" + i + "].points[" + j + "]." + attributeName + ")");
+                                        }
+                                    }
+                                }
+
+                                String pointIcon = getValueFrom(getNode(point, "icon"));
+                                if (StringUtils.isEmpty(pointIcon)) {
+                                    restResponse.addError("Invalid point icon.  Point icon is required. @ Path (rooms[" + i + "].points[" + j + "].icon)");
+                                } else if (!LIST_POINT_ICON.contains(pointIcon)) {
+                                    restResponse.addError("Invalid point icon.  Provided icon value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].icon)");
+                                }
+
+                                String pointRecenter = getValueFrom(getNode(point, "pointRecenter"));
+                                if (!StringUtils.isEmpty(pointIcon) && !LIST_TRUE_FALSE.contains(pointRecenter)) {
+                                    restResponse.addError("Invalid point recenter.  Provided recenter value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].recenter)");
+                                }
+
+                                String pointAction = getValueFrom(getNode(point, "action"));
+                                if (StringUtils.isEmpty(pointAction)) {
+                                    restResponse.addError("Invalid point action.  Point action is required. @ Path (rooms[" + i + "].points[" + j + "].action)");
+                                } else if (!LIST_POINT_ACTION.contains(pointAction)) {
+                                    restResponse.addError("Invalid point action.  Provided action value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].action)");
+                                } else {
+                                    if (pointAction.equals("nav")) {
+                                        String pointTo = getValueFrom(getNode(point, "to"));
+                                        if (StringUtils.isEmpty(pointTo)) {
+                                            restResponse.addError("Invalid point to.  Point to is required when action is nav. @ Path (rooms[" + i + "].points[" + j + "].to)");
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (restResponse.isSuccessful()) {
+                // Ready to save
+                final File tourFolder = new File(toursFolder, tour + File.separator);
+                final File infoFile = new File(tourFolder, "index.tour.json");
+
+                if (writeFile(infoFile, jsonStr)) {
+                    restResponse.addMessage("Updated: " + infoFile.getAbsolutePath());
+                } else {
+                    restResponse.addError("Unable to save to: " + infoFile.getAbsolutePath());
+                }
+
+            }
+
+
+        } catch (Exception ex) {
+            restResponse.setCode(RestResponseCodes.FAILURE);
+            restResponse.addMessage(ex.toString());
+            ex.printStackTrace();
+        }
+
+        return restResponse;
+    }
+
+    @Nullable
+    private JsonNode getNode(@NotNull final JsonNode root, @NotNull final String path) {
+        String[] parts = path.split("\\.");
+        JsonNode node = root;
+        for (String part : parts) {
+            if (node == null) {
+                return null;
+            }
+            node = node.get(part);
+        }
+        return node;
+    }
+
+    @NotNull
+    private String getValueFrom(@Nullable final JsonNode node) {
+        if (node == null) {
+            return "";
+        }
+        final String value = node.asText();
+        return StringUtils.isEmpty(value) ? "" : value;
+    }
+
+    private boolean isEmptyOrFloat(@NotNull final String value) {
+        if (StringUtils.isEmpty(value)) {
+            return true;
+        } else {
+            return TOUR_FLOAT.matcher(value).matches();
+        }
+    }
+
     @GET
     @Path("/{tour:[a-z0-9-_]+\\.tour}/{file:[a-zA-Z0-9-_]+(\\.jpg|\\.png){0,1}\\.png}")
     @Produces("image/png")
@@ -270,7 +442,7 @@ public class ResourceComponent {
         return Response.noContent().build();
     }
 
-    public static String readJsonFile(File jsonFile) {
+    public static String readJsonFile(@NotNull final File jsonFile) {
         if (jsonFile.exists() && jsonFile.isFile() && jsonFile.getName().endsWith(".json")) {
             try (FileInputStream fileInputStream = new FileInputStream(jsonFile)) {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
@@ -285,6 +457,21 @@ public class ResourceComponent {
             }
         }
         return "";
+    }
+
+    public static boolean writeFile(@NotNull final File jsonFile, @NotNull final String jsonContent) {
+        if (jsonFile.exists() && jsonFile.isFile() && jsonFile.getName().endsWith(".json")) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(jsonFile)) {
+                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+                byte [] bytes = jsonContent.getBytes("UTF-8");
+                bufferedOutputStream.write(bytes, 0, bytes.length);
+                bufferedOutputStream.flush();
+                return true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return false;
     }
 
     private boolean deleteDir(File file) {

@@ -17,7 +17,7 @@ public class EditController {
     @RequestMapping("/edit/{tour:[a-z0-9-_]+\\.tour}/")
     String edit(Model model, @PathVariable("tour") String tourIdentifier) {
 
-        model.addAttribute("bodyTemplate", "editor");
+        model.addAttribute("bodyTemplate", "tourEditor");
         model.addAttribute("tourIdentifier", tourIdentifier);
         model.addAttribute("menuItem", "edit");
 
