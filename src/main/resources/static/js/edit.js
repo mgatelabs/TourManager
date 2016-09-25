@@ -8,6 +8,8 @@
     ns.currentPoint = {};
     ns.roomMap = {};
 
+    ns.newPointBtn = undefined,
+
     ns.start = function(tourId) {
 
         // Info
@@ -49,6 +51,7 @@
         ns.roomName = $('#roomName').prop('disabled', true);
         ns.roomContent = $('#roomContent').prop('disabled', true);
         ns.roomPlaybackType = $('#roomPlaybackType').prop('disabled', true);
+        ns.roomRotation = $('#roomRotation').prop('disabled', true);
 
         ns.roomName.change(function(){
             if (ns.currentRoom) {
@@ -68,7 +71,13 @@
             }
         });
 
-        $('#newRoom').click(function(){
+        ns.roomRotation.change(function(){
+            if (ns.currentRoom) {
+                ns.currentRoom.yaw = $(this).val();
+            }
+        });
+
+        ns.newPointBtn = $('#newRoom').prop('disabled', true).click(function(){
             var roomId = prompt("New room identifier:");
             if (roomId) {
                 for (i = 0; i < ns.index.json.rooms.length; i++) {
@@ -78,13 +87,18 @@
                         return;
                     }
                 }
+                ns.deSelectRoom();
+
                 ns.index.json.rooms.push({"id":roomId, "title":roomId, "content":"","points":[]});
 
                 ns.updateRoomList();
+                ns.updatePointToList()
 
                 ns.selectRoom(ns.index.json.rooms.length - 1);
             }
         });
+
+
 
         // Point List
         ns.pointBody = $('#pointTable tbody');
@@ -105,6 +119,21 @@
                     ns.updatePointList();
                 } break;
             }
+        });
+
+        $('#newPoint').click(function(){
+            if (!ns.currentRoom) {
+                alert('Please select a room first');
+                return;
+            } else if (ns.currentRoom.points.length >= 10) {
+                alert('Maximum point limit reached.  A room may only have 10 points.');
+                return;
+            }
+            ns.deSelectPoint();
+            ns.currentRoom.points.push({title:'Untitled', type:'rot', action:'stop', icon:'dot', recenter:'false',});
+            ns.updatePointList();
+            ns.selectPoint(ns.currentRoom.points.length - 1);
+            $('#tabList a[href="#pointEditor"]').tab('show');
         });
 
         // Point Editor
@@ -304,10 +333,11 @@
             // Error handler
         } else {
             // Go
+            MG.common.beforeHandler();
             $.post( "/rest/resource/" + ns.tourId + '/info', {info: JSON.stringify(ns.index.json)}, function( data ) {
               if (data.code == 'OK') {
                 // Created, switch to edit
-
+                MG.common.beforeHandler();
 
 
               } else {
@@ -363,7 +393,7 @@
         var i, item, tr, td, link;
         ns.pointBody.empty();
 
-        if (!ns.currentRoom) return;
+        if (!ns.currentRoom || !ns.currentRoom.points) return;
 
         for (i = 0; i < ns.currentRoom.points.length; i++) {
             item = ns.currentRoom.points[i];
@@ -449,6 +479,8 @@
 
         ns.currentRoom = ns.index.json.rooms[roomIndex];
 
+        ns.newPointBtn.prop('disabled', false);
+
         ns.deSelectPoint();
 
         $('#pointEditLink').addClass('disabled');
@@ -456,6 +488,7 @@
         ns.roomName.prop('disabled', false).val(ns.currentRoom.title);
         ns.roomContent.prop('disabled', false).val(ns.currentRoom.content);
         ns.roomPlaybackType.prop('disabled', false).val(ns.currentRoom.playback || '360');
+        ns.roomRotation.prop('disabled', false).val(ns.currentRoom.yaw || '0');
 
         ns.updatePointList();
     };
@@ -464,6 +497,8 @@
 
         ns.currentRoom = {};
 
+        ns.newPointBtn.prop('disabled', true);
+
         ns.deSelectPoint();
 
         $('#pointEditLink').addClass('disabled');
@@ -471,6 +506,7 @@
         ns.roomName.prop('disabled', true).val('');
         ns.roomContent.prop('disabled', true).val([]);
         ns.roomPlaybackType.prop('disabled', true).val('360');
+        ns.roomRotation.prop('disabled', true).val('0');
     };
 
     ns.moveRoom = function(roomIndex) {

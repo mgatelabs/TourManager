@@ -46,4 +46,11 @@ public class BaseRestResponse {
         setCode(RestResponseCodes.ERROR);
         messages.add(msg);
     }
+
+    @Override
+    public String toString() {
+        return "BaseRestResponse{" +
+                "code=" + code +
+                '}';
+    }
 }

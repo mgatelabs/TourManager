@@ -133,6 +133,11 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label for="roomRotation">Rotation (Yaw)</label>
+                            <input type="number" class="form-control" id="roomRotation" placeholder="Rotation" min="-180" max="180" step="1"/>
+                        </div>
+
                     </div>
                 </div>
 
@@ -243,7 +248,7 @@
                                     <label for="pointRecenter">Recenter</label>
                                     <select class="form-control" id="pointRecenter">
                                         <option value="true">True</option>
-                                        <option value="false">false</option>
+                                        <option value="false">False</option>
                                     </select>
                                 </div>
 
@@ -359,8 +364,15 @@
 
             $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', function(){
                 MG.preview.instance.onWindowResize();
+                MG.preview.instance.prep(MG.edit.currentRoom);
+                MG.preview.instance.point(MG.edit.currentPoint);
                 MG.preview.instance.changeBackground(MG.edit.getBackgroundUrl());
                 MG.preview.instance.update();
+            });
+
+            $('#tabList a[href="#roomEditor"]').on('shown.bs.tab', function(){
+                MG.edit.updateRoomList();
+                MG.edit.updatePointList();
             });
         });
     </script>

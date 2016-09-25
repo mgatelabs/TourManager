@@ -33,7 +33,7 @@ public class ResourceComponent {
 
     public static final Pattern TOUR_IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9-_]+$");
     public static final Pattern TOUR_FULL_PATTERN = Pattern.compile("^[a-z0-9-_]+.tour$");
-    public static final Pattern TOUR_FLOAT = Pattern.compile("^[0-9]*(\\.[0-9]+){0,1}$");
+    public static final Pattern TOUR_FLOAT = Pattern.compile("^[-]{0,1}[0-9]*(\\.[0-9]+){0,1}$");
 
     @POST
     @Path("/tour/create")
@@ -284,60 +284,76 @@ public class ResourceComponent {
                         if (!StringUtils.isEmpty(playbackType) && !LIST_ROOM_PLAYBACK.contains(playbackType)) {
                             restResponse.addError("Invalid room playback type.  @ Path (rooms[" + i + "].playback)");
                         }
+
+                        String roomYaw = getValueFrom(getNode(room, "yaw"));
+                        if (!isEmptyOrFloat(roomYaw)) {
+                            String attributeName = "yaw";
+                            restResponse.addError("Invalid point " + attributeName + ".  Provided " + attributeName + " value was not a valid decimal.  Acceptable formats include ## or #.# or .##. @ Path (rooms[" + i + "]." + attributeName + ")");
+                        }
+
                         JsonNode roomPoints = getNode(room, "points");
                         if (roomPoints == null || roomPoints.size() == 0) {
                             restResponse.addError("Invalid point list.  A room must define at least one point. @ Path (rooms[" + i + "].points)");
                         } else {
-                            for (int j = 0; j < rooms.size(); j++) {
+                            for (int j = 0; j < roomPoints.size(); j++) {
                                 JsonNode point = roomPoints.get(j);
 
-                                JsonNode pointTitle = getNode(point, "title");
-                                if (StringUtils.isEmpty(getValueFrom(pointTitle))) {
-                                    restResponse.addError("Invalid point title.  Point title is required. @ Path (rooms[" + i + "].points[" + j + "].title)");
+                                {
+                                    JsonNode pointTitle = getNode(point, "title");
+                                    if (StringUtils.isEmpty(getValueFrom(pointTitle))) {
+                                        restResponse.addError("Invalid point title.  Point title is required. @ Path (rooms[" + i + "].points[" + j + "].title)");
+                                    }
                                 }
 
-                                String pointType = getValueFrom(getNode(point, "type"));
-                                if (StringUtils.isEmpty(pointType)) {
-                                    restResponse.addError("Invalid point type.  Point type is required. @ Path (rooms[" + i + "].points[" + j + "].type)");
-                                } else if (!LIST_POINT_TYPE.contains(pointType)) {
-                                    restResponse.addError("Invalid point type.  Provided type value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].type)");
-                                } else {
-                                    Set<String> checkAgainst = pointType.equals("nav") ? ATTRS_FOR_ROT : ATTRS_FOR_POINT;
+                                {
+                                    String pointType = getValueFrom(getNode(point, "type"));
+                                    if (StringUtils.isEmpty(pointType)) {
+                                        restResponse.addError("Invalid point type.  Point type is required. @ Path (rooms[" + i + "].points[" + j + "].type)");
+                                    } else if (!LIST_POINT_TYPE.contains(pointType)) {
+                                        restResponse.addError("Invalid point type.  Provided type value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].type)");
+                                    } else {
+                                        Set<String> checkAgainst = pointType.equals("rot") ? ATTRS_FOR_ROT : ATTRS_FOR_POINT;
 
-                                    for (String attributeName : checkAgainst) {
-                                        JsonNode pointValue = getNode(point, attributeName);
-                                        if (!isEmptyOrFloat(getValueFrom(pointValue))) {
-                                            restResponse.addError("Invalid point " + attributeName + ".  Provided " + attributeName + " value was not a valid decimal.  Acceptable formats include ## or #.# or .##. @ Path (rooms[" + i + "].points[" + j + "]." + attributeName + ")");
+                                        for (String attributeName : checkAgainst) {
+                                            JsonNode pointValue = getNode(point, attributeName);
+                                            if (!isEmptyOrFloat(getValueFrom(pointValue))) {
+                                                restResponse.addError("Invalid point " + attributeName + ".  Provided " + attributeName + " value was not a valid decimal.  Acceptable formats include ## or #.# or .##. @ Path (rooms[" + i + "].points[" + j + "]." + attributeName + ")");
+                                            }
                                         }
                                     }
                                 }
 
-                                String pointIcon = getValueFrom(getNode(point, "icon"));
-                                if (StringUtils.isEmpty(pointIcon)) {
-                                    restResponse.addError("Invalid point icon.  Point icon is required. @ Path (rooms[" + i + "].points[" + j + "].icon)");
-                                } else if (!LIST_POINT_ICON.contains(pointIcon)) {
-                                    restResponse.addError("Invalid point icon.  Provided icon value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].icon)");
-                                }
-
-                                String pointRecenter = getValueFrom(getNode(point, "pointRecenter"));
-                                if (!StringUtils.isEmpty(pointIcon) && !LIST_TRUE_FALSE.contains(pointRecenter)) {
-                                    restResponse.addError("Invalid point recenter.  Provided recenter value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].recenter)");
-                                }
-
-                                String pointAction = getValueFrom(getNode(point, "action"));
-                                if (StringUtils.isEmpty(pointAction)) {
-                                    restResponse.addError("Invalid point action.  Point action is required. @ Path (rooms[" + i + "].points[" + j + "].action)");
-                                } else if (!LIST_POINT_ACTION.contains(pointAction)) {
-                                    restResponse.addError("Invalid point action.  Provided action value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].action)");
-                                } else {
-                                    if (pointAction.equals("nav")) {
-                                        String pointTo = getValueFrom(getNode(point, "to"));
-                                        if (StringUtils.isEmpty(pointTo)) {
-                                            restResponse.addError("Invalid point to.  Point to is required when action is nav. @ Path (rooms[" + i + "].points[" + j + "].to)");
-                                        }
+                                {
+                                    String pointIcon = getValueFrom(getNode(point, "icon"));
+                                    if (StringUtils.isEmpty(pointIcon)) {
+                                        restResponse.addError("Invalid point icon.  Point icon is required. @ Path (rooms[" + i + "].points[" + j + "].icon)");
+                                    } else if (!LIST_POINT_ICON.contains(pointIcon)) {
+                                        restResponse.addError("Invalid point icon.  Provided icon value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].icon)");
                                     }
                                 }
 
+                                {
+                                    String pointRecenter = getValueFrom(getNode(point, "recenter"));
+                                    if (!StringUtils.isEmpty(pointRecenter) && !LIST_TRUE_FALSE.contains(pointRecenter)) {
+                                        restResponse.addError("Invalid point recenter.  Provided recenter value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].recenter)");
+                                    }
+                                }
+
+                                {
+                                    String pointAction = getValueFrom(getNode(point, "action"));
+                                    if (StringUtils.isEmpty(pointAction)) {
+                                        restResponse.addError("Invalid point action.  Point action is required. @ Path (rooms[" + i + "].points[" + j + "].action)");
+                                    } else if (!LIST_POINT_ACTION.contains(pointAction)) {
+                                        restResponse.addError("Invalid point action.  Provided action value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].action)");
+                                    } else {
+                                        if (pointAction.equals("nav")) {
+                                            String pointTo = getValueFrom(getNode(point, "to"));
+                                            if (StringUtils.isEmpty(pointTo)) {
+                                                restResponse.addError("Invalid point to.  Point to is required when action is nav. @ Path (rooms[" + i + "].points[" + j + "].to)");
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
