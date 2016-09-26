@@ -22,6 +22,9 @@ This is very basic at the moment, it only supports loading in the *.tour folders
 - You will want to use the Runner class to start the application.  Just specify a work folder, thats outside the project.  On startup, it will construct the neccessary folders for data storage in your working folder.
 - You can open you browser to http://localhost:8080 and use the web app.  Don't use EDGE, it can't read from the localhost.
 
+# Licensing
+- The files in and under /src/main/resources/static/images are exclusive to TourManager.  They are not public domain, but if you fork the project, you can continue to use them as they were intended.
+
 
 # Format
 
