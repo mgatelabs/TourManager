@@ -8,7 +8,7 @@
     ns.currentPoint = {};
     ns.roomMap = {};
 
-    ns.newPointBtn = undefined,
+    ns.newRoomBtn = undefined,
 
     ns.start = function(tourId) {
 
@@ -48,6 +48,7 @@
         });
 
         // Room Editor
+        ns.roomId = $('#roomId').prop('disabled', true);
         ns.roomName = $('#roomName').prop('disabled', true);
         ns.roomContent = $('#roomContent').prop('disabled', true);
         ns.roomPlaybackType = $('#roomPlaybackType').prop('disabled', true);
@@ -73,11 +74,14 @@
 
         ns.roomRotation.change(function(){
             if (ns.currentRoom) {
-                ns.currentRoom.yaw = $(this).val();
+                if (!ns.currentRoom.world) {
+                    ns.currentRoom.world = {};
+                }
+                ns.currentRoom.world.yaw = $(this).val();
             }
         });
 
-        ns.newPointBtn = $('#newRoom').prop('disabled', true).click(function(){
+        ns.newRoomBtn = $('#newRoom').prop('disabled', true).click(function(){
             var roomId = prompt("New room identifier:");
             if (roomId) {
                 for (i = 0; i < ns.index.json.rooms.length; i++) {
@@ -89,7 +93,7 @@
                 }
                 ns.deSelectRoom();
 
-                ns.index.json.rooms.push({"id":roomId, "title":roomId, "content":"","points":[]});
+                ns.index.json.rooms.push({"id":roomId, "title":roomId, "content":"","points":[], "world":{}});
 
                 ns.updateRoomList();
                 ns.updatePointToList()
@@ -136,6 +140,15 @@
             $('#tabList a[href="#pointEditor"]').tab('show');
         });
 
+        $('#previewPoints').click(function(){
+            if (!ns.currentRoom) {
+                alert('Please select a room first');
+                return;
+            }
+            ns.deSelectPoint();
+            $('#tabList a[href="#pointEditor"]').tab('show');
+        });
+
         // Point Editor
         ns.pointTitle = $('#pointTitle').prop('disabled', true);
         ns.pointType = $('#pointType').prop('disabled', true);
@@ -159,42 +172,49 @@
         ns.pointTitle.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.title = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointType.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.type = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointIcon.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.icon = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointAction.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.action = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointSize.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.size = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointTo.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.to = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointRecenter.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.recenter = $(this).val();
+                ns.pointUpdated();
             }
         });
 
@@ -203,18 +223,21 @@
         ns.pointRotY.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.yaw = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointRotP.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.pitch = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointRotD.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.depth = $(this).val();
+                ns.pointUpdated();
             }
         });
 
@@ -223,36 +246,42 @@
         ns.pointX.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.x = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointY.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.y = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointZ.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.z = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointXrot.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.xrot = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointYrot.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.yrot = $(this).val();
+                ns.pointUpdated();
             }
         });
 
         ns.pointZrot.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.zrot = $(this).val();
+                ns.pointUpdated();
             }
         });
 
@@ -361,6 +390,10 @@
         ns.updatePointToList();
     }
 
+    /**
+     * Room Operations
+     */
+
     ns.updateRoomList = function() {
         var i, item, tr, td, link;
         ns.roomBody.empty();
@@ -388,6 +421,69 @@
 
         }
     };
+
+    ns.updateRoomContentList = function() {
+        var i, item, option;
+        ns.roomContent.empty();
+        for (i = 0; i < ns.media.length; i++) {
+            item = ns.media[i];
+            option = $('<option></option>').appendTo(ns.roomContent);
+            option.text(item.json.display || item.name);
+            option.attr('value',item.name);
+        }
+    };
+
+    ns.selectRoom = function(roomIndex){
+
+        ns.currentRoom = ns.index.json.rooms[roomIndex];
+
+        ns.deSelectPoint();
+
+        $('#pointEditLink').addClass('disabled');
+
+        // Integrity
+        if (!ns.currentRoom.world) {
+            ns.currentRoom.world = {};
+        }
+
+        ns.roomId.val(ns.currentRoom.id);
+        ns.roomName.prop('disabled', false).val(ns.currentRoom.title);
+        ns.roomContent.prop('disabled', false).val(ns.currentRoom.content);
+        ns.roomPlaybackType.prop('disabled', false).val(ns.currentRoom.playback || '360');
+        ns.roomRotation.prop('disabled', false).val(ns.currentRoom.world.yaw || '0');
+
+        ns.updatePointList();
+    };
+
+    ns.deSelectRoom = function(){
+
+        ns.currentRoom = undefined;
+
+        //ns.newRoomBtn.prop('disabled', true);
+
+        ns.deSelectPoint();
+
+        $('#pointEditLink').addClass('disabled');
+
+        ns.roomId.val('');
+        ns.roomName.prop('disabled', true).val('');
+        ns.roomContent.prop('disabled', true).val([]);
+        ns.roomPlaybackType.prop('disabled', true).val('360');
+        ns.roomRotation.prop('disabled', true).val('0');
+    };
+
+    ns.moveRoom = function(roomIndex) {
+
+        ns.deSelectRoom();
+
+        var toRemove = ns.index.json.rooms.splice(roomIndex, 1)[0];
+
+        ns.index.json.rooms.splice(roomIndex - 1, 0, toRemove);
+    };
+
+    /**
+     * Point Operations
+     */
 
     ns.updatePointList = function() {
         var i, item, tr, td, link;
@@ -446,82 +542,6 @@
         }
     };
 
-    ns.updateMediaList = function() {
-        var i, item, tr, td, link;
-        ns.mediaBody.empty();
-        for (i = 0; i < ns.media.length; i++) {
-            item = ns.media[i];
-            tr = $('<tr></tr>').appendTo(ns.mediaBody);
-            $('<td></td>').text(item.name).appendTo(tr);
-            $('<td></td>').text(item.json.display || 'Untitled').appendTo(tr);
-            $('<td></td>').text(item.preview).appendTo(tr);
-            td = $('<td></td>').appendTo(tr);
-
-        }
-    };
-
-    /**
-     * Room Operations
-     */
-
-    ns.updateRoomContentList = function() {
-        var i, item, option;
-        ns.roomContent.empty();
-        for (i = 0; i < ns.media.length; i++) {
-            item = ns.media[i];
-            option = $('<option></option>').appendTo(ns.roomContent);
-            option.text(item.json.display || item.name);
-            option.attr('value',item.name);
-        }
-    };
-
-    ns.selectRoom = function(roomIndex){
-
-        ns.currentRoom = ns.index.json.rooms[roomIndex];
-
-        ns.newPointBtn.prop('disabled', false);
-
-        ns.deSelectPoint();
-
-        $('#pointEditLink').addClass('disabled');
-
-        ns.roomName.prop('disabled', false).val(ns.currentRoom.title);
-        ns.roomContent.prop('disabled', false).val(ns.currentRoom.content);
-        ns.roomPlaybackType.prop('disabled', false).val(ns.currentRoom.playback || '360');
-        ns.roomRotation.prop('disabled', false).val(ns.currentRoom.yaw || '0');
-
-        ns.updatePointList();
-    };
-
-    ns.deSelectRoom = function(){
-
-        ns.currentRoom = {};
-
-        ns.newPointBtn.prop('disabled', true);
-
-        ns.deSelectPoint();
-
-        $('#pointEditLink').addClass('disabled');
-
-        ns.roomName.prop('disabled', true).val('');
-        ns.roomContent.prop('disabled', true).val([]);
-        ns.roomPlaybackType.prop('disabled', true).val('360');
-        ns.roomRotation.prop('disabled', true).val('0');
-    };
-
-    ns.moveRoom = function(roomIndex) {
-
-        ns.deSelectRoom();
-
-        var toRemove = ns.index.json.rooms.splice(roomIndex, 1)[0];
-
-        ns.index.json.rooms.splice(roomIndex - 1, 0, toRemove);
-    };
-
-    /**
-     * Point Operations
-     */
-
     ns.updatePointToList = function() {
 
         ns.roomMap = {};
@@ -569,7 +589,7 @@
 
     ns.deSelectPoint = function(){
 
-        ns.currentPoint = {};
+        ns.currentPoint = undefined;
 
         $('#pointEditLink').addClass('disabled');
 
@@ -603,8 +623,35 @@
         ns.currentRoom.points.splice(pointIndex - 1, 0, toRemove);
     };
 
+    ns.pointUpdated = function() {
+        MG.preview.instance.points(MG.edit.currentRoom, MG.edit.currentPoint);
+        MG.preview.instance.update();
+    }
+
+    /**
+     * Media Operations
+     */
+
+    ns.updateMediaList = function() {
+        var i, item, tr, td, link;
+        ns.mediaBody.empty();
+        for (i = 0; i < ns.media.length; i++) {
+            item = ns.media[i];
+            tr = $('<tr></tr>').appendTo(ns.mediaBody);
+            $('<td></td>').text(item.name).appendTo(tr);
+            $('<td></td>').text(item.json.display || 'Untitled').appendTo(tr);
+            $('<td></td>').text(item.preview).appendTo(tr);
+            td = $('<td></td>').appendTo(tr);
+
+        }
+    };
+
+    /**
+     * Utility Operations
+     */
+
     ns.getBackgroundUrl = function(){
-        if (ns.currentPoint && ns.currentRoom && ns.currentRoom.content) {
+        if (ns.currentRoom && ns.currentRoom.content) {
             return "/rest/resource/" + ns.tourId + '/' + ns.currentRoom.content;
         }
         return "";

@@ -95,51 +95,80 @@
 
 
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Room Editor</h3>
+
+
+                <div class="row" style="margin-top:1em;">
+
+                    <div class="col-md-4">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Room</h3>
+                            </div>
+                            <div class="panel-body">
+
+                                <div class="form-group">
+                                    <label for="roomId">Name</label>
+                                    <input type="text" class="form-control" id="roomId" placeholder="Identifier"/>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="roomName">Name</label>
+                                    <input type="text" class="form-control" id="roomName" placeholder="Name"/>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="roomContent">Content</label>
+                                    <select class="form-control" id="roomContent"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="roomPlaybackType">Playback Type</label>
+                                    <select class="form-control" id="roomPlaybackType">
+                                        <option value="360">2D 360 (Default)</option>
+                                        <option value="360lr">3D 360 Left Right</option>
+                                        <option value="360tb">3D 360 Top Bottom</option>
+                                        <option value="2d">2D Flat</option>
+                                        <option value="lr">3D Flat Left Right</option>
+                                        <option value="rl">3D Flat Right left</option>
+                                        <option value="tb">3D Flat Top Bottom</option>
+                                        <option value="180">2D 180</option>
+                                        <option value="180lr">3D 180 Left Right</option>
+                                        <option value="180tb">3D 180 Top Bottom</option>
+                                        <option value="ffd">2D Front Full Dome</option>
+                                        <option value="ffdlr">3D Front Full Dome Left Right</option>
+                                        <option value="ffdtb">3D Front Full Dome Top Bottom</option>
+                                        <option value="cube">2D Cube</option>
+                                        <option value="cubelr">3D Cube Left Right</option>
+                                        <option value="cubetb">3D Cube Top Bottom</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="panel-body">
+                    <div class="col-md-4">
 
-                        <div class="form-group">
-                            <label for="roomName">Name</label>
-                            <input type="text" class="form-control" id="roomName" placeholder="Name"/>
-                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">World</h3>
+                            </div>
+                            <div class="panel-body">
 
-                        <div class="form-group">
-                            <label for="roomContent">Content</label>
-                            <select class="form-control" id="roomContent"></select>
-                        </div>
+                                <div class="form-group">
+                                    <label for="roomRotation">Rotation (Yaw)</label>
+                                    <input type="number" class="form-control" id="roomRotation" placeholder="Rotation" min="-180" max="180" step="1"/>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="roomPlaybackType">Playback Type</label>
-                            <select class="form-control" id="roomPlaybackType">
-                                <option value="360">2D 360 (Default)</option>
-                                <option value="360lr">3D 360 Left Right</option>
-                                <option value="360tb">3D 360 Top Bottom</option>
-                                <option value="2d">2D Flat</option>
-                                <option value="lr">3D Flat Left Right</option>
-                                <option value="rl">3D Flat Right left</option>
-                                <option value="tb">3D Flat Top Bottom</option>
-                                <option value="180">2D 180</option>
-                                <option value="180lr">3D 180 Left Right</option>
-                                <option value="180tb">3D 180 Top Bottom</option>
-                                <option value="ffd">2D Front Full Dome</option>
-                                <option value="ffdlr">3D Front Full Dome Left Right</option>
-                                <option value="ffdtb">3D Front Full Dome Top Bottom</option>
-                                <option value="cube">2D Cube</option>
-                                <option value="cubelr">3D Cube Left Right</option>
-                                <option value="cubetb">3D Cube Top Bottom</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="roomRotation">Rotation (Yaw)</label>
-                            <input type="number" class="form-control" id="roomRotation" placeholder="Rotation" min="-180" max="180" step="1"/>
+                            </div>
                         </div>
 
                     </div>
                 </div>
+
+
+
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -163,6 +192,8 @@
 
                         <div class="btn-group" role="group" aria-label="...">
                             <button type="button" class="btn btn-primary" id="newPoint">New Point</button>
+
+                            <button type="button" class="btn btn-info" id="previewPoints">Preview</button>
                         </div>
 
                     </div>
@@ -365,7 +396,7 @@
             $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', function(){
                 MG.preview.instance.onWindowResize();
                 MG.preview.instance.prep(MG.edit.currentRoom);
-                MG.preview.instance.point(MG.edit.currentPoint);
+                MG.preview.instance.points(MG.edit.currentRoom, MG.edit.currentPoint);
                 MG.preview.instance.changeBackground(MG.edit.getBackgroundUrl());
                 MG.preview.instance.update();
             });

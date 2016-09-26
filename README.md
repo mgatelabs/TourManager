@@ -45,16 +45,19 @@ This is very basic at the moment, it only supports loading in the *.tour folders
       'title': 'Display name'
       rooms: [
         {
-          identifier: 'unique id',
+          id: 'unique id',
           title: 'Display name',
           playback: '360' || '360lr' || '360tb' || '2d' || 'lr' || 'rl' || '180' || '180lr' || '180tb',
           content: 'filename',
+          world: {
+            yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
+          },
           points: [
             {
                 title: 'Display name',
                 type: 'rot' || 'point',
                 action: 'nav' || 'exit' || 'stop',
-                to: 'room identifier', // when action == 'nav'
+                to: 'room id', // when action == 'nav'
                 recenter: true || false, // true to reset view
                 yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
                 pitch: FLOAT, // when type == 'rot'. -90 - 90. Up = +.  0 will default.

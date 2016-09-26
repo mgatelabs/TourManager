@@ -25,6 +25,8 @@
 
         icons: undefined,
 
+        atlas: undefined,
+
         backgroundUrl: '',
 
         init: function(options){
@@ -69,18 +71,38 @@
             el.on('mousemove', function(event){self.onDocumentMouseMove(event)});
             el.on('mouseup', function(event){self.onDocumentMouseUp(event)});
 
+            this.atlas = {
+                'eye': this._getAtlasTexture(58),
+                'dot': this._getAtlasTexture(51),
+                'exit': this._getAtlasTexture(57),
+                'stop': this._getAtlasTexture(56),
+                'up': this._getAtlasTexture(12),
+                'down': this._getAtlasTexture(14),
+                'left': this._getAtlasTexture(15),
+                'right': this._getAtlasTexture(13),
+                'previous': this._getAtlasTexture(24),
+                'next': this._getAtlasTexture(23)
+            };
+
+        },
+        _getAtlasTexture: function(index) {
+            var texture = new THREE.TextureLoader().load('/static/images/atlas/atlas_' + index + '.png');
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.needsUpdate = true;
+            return texture;
         },
         generateIcon: function(index){
 
             var geometry = new THREE.PlaneGeometry(1, 1);
-            //var geometry = new THREE.ConeGeometry(1, 1, 32 );
-            //var geometry = new THREE.BoxGeometry(1, 1, 5);
-            var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ); // FrontSide
+            var material = new THREE.MeshBasicMaterial( {/*color: 0xffff00, */side: THREE.FrontSide} ); // FrontSide || DoubleSide
             material.depthWrite = false;
             material.depthTest = false;
             material.transparent = true;
             var plane = new THREE.Mesh( geometry, material );
             plane.rotation.x = Math.PI / 2;
+            plane.rotation.y = Math.PI;
+            plane.rotation.z = Math.PI / 2;
 
             var obj1 = new THREE.Object3D();
             obj1.visible = false;
@@ -124,9 +146,9 @@
             this.lat = 0;
             this.phi = 0;
             if (room) {
-                if (room.yaw) {
+                if (room.world && room.world.yaw) {
                     this.mesh.rotation.x = 0;
-                    this.mesh.rotation.y = this.radians(-room.yaw - 0);
+                    this.mesh.rotation.y = this.radians(-room.world.yaw - 0);
                     this.mesh.rotation.z = 0;
                 } else {
                     this.mesh.rotation.x = 0;
@@ -135,9 +157,30 @@
                 }
             }
         },
-        point: function(point) {
-            var icon = this.icons[0];
+        points: function(room, point) {
+
+            var i;
+
+            for (i = 0; i < 10; i++) {
+                this.icons[i][0].visible = false;
+            }
+
+            if (!room) {
+                return;
+            }
+
+            if (!point) {
+                for (i = 0; i < 10; i++) {
+                    this.point(i < room.points.length ? room.points[i] : undefined, i);
+                }
+            } else {
+                this.point(point, 0);
+            }
+        },
+        point: function(point, index) {
+            var icon = this.icons[index];
             if (point) {
+                icon[2].material.map = this.atlas[point.icon || 'dot'];
                 if (point.type == 'rot') {
                     // Update point 0
                     icon[0].visible = true;
