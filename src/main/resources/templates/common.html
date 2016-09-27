@@ -35,6 +35,7 @@
 <div th:fragment="tourEditor">
     <script type="text/javascript" th:src="@{/static/js/edit.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/three.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/mvrs/geom.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/edit.preview.js}"></script>
     <input type="hidden" id="tourIdentifier" th:value="${tourIdentifier}"/>
 
@@ -205,25 +206,7 @@
 
                 <div class="row" style="margin-top:1em;">
 
-                    <div class="col-md-12">
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Preview</h3>
-                            </div>
-                            <div class="panel-body" id="previewPanel" style="height:480px;margin:0;padding:0;">
-
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="row" style="margin-top:1em;">
-
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -292,34 +275,21 @@
                         </div>
 
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Rotation</h3>
                             </div>
-                            <div class="panel-body">
+                            <div class="panel-body" id="previewPanel" style="height:480px;margin:0;padding:0;">
 
-                                <div class="form-group">
-                                    <label for="pointRotY">Yaw</label>
-                                    <input type="number" class="form-control rotBased" id="pointRotY" placeholder="Yaw" min="-180" max="180" step="0.1"/>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="pointRotP">Pitch</label>
-                                    <input type="number" class="form-control rotBased" id="pointRotP" placeholder="Pitch" min="-90" max="90" step="0.1"/>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="pointRotD">Depth</label>
-                                    <input type="number" class="form-control rotBased" id="pointRotD" placeholder="Depth" min="1.5" max="10" step="0.1"/>
-                                </div>
 
                             </div>
                         </div>
 
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="col-md-3">
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -327,35 +297,56 @@
                             </div>
                             <div class="panel-body">
 
-                                <div class="form-group">
+
+
+                                <div class="form-group rot-based">
+                                    <label for="pointRotY">Yaw</label>
+                                    <input type="number" class="form-control rotBased" id="pointRotY" placeholder="Yaw" min="-180" max="180" step="0.1"/>
+                                </div>
+
+                                <div class="form-group rot-based">
+                                    <label for="pointRotP">Pitch</label>
+                                    <input type="number" class="form-control rotBased" id="pointRotP" placeholder="Pitch" min="-90" max="90" step="0.1"/>
+                                </div>
+
+                                <div class="form-group rot-based">
+                                    <label for="pointRotD">Depth</label>
+                                    <input type="number" class="form-control rotBased" id="pointRotD" placeholder="Depth" min="1.5" max="10" step="0.1"/>
+                                </div>
+
+
+
+                                <div class="form-group point-based">
                                     <label for="pointX">X</label>
                                     <input type="number" class="form-control rotBased" id="pointX" placeholder="X" min="-50" max="50" step="0.1"/>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group point-based">
                                     <label for="pointY">Y</label>
                                     <input type="number" class="form-control rotBased" id="pointY" placeholder="Y" min="-50" max="50" step="0.1"/>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group point-based">
                                     <label for="pointZ">Z</label>
                                     <input type="number" class="form-control rotBased" id="pointZ" placeholder="Z" min="-50" max="50" step="0.1"/>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group point-based">
                                     <label for="pointXrot">X Rotation</label>
                                     <input type="number" class="form-control rotBased" id="pointXrot" placeholder="X Rotation" min="-180" max="180" step="0.1"/>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group point-based">
                                     <label for="pointYrot">Y Rotation</label>
                                     <input type="number" class="form-control rotBased" id="pointYrot" placeholder="Y Rotation" min="-180" max="180" step="0.1"/>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group point-based">
                                     <label for="pointZrot">Z Rotation</label>
                                     <input type="number" class="form-control rotBased" id="pointZrot" placeholder="Z Rotation" min="-180" max="180" step="0.1"/>
                                 </div>
+
+
 
                             </div>
                         </div>
@@ -395,9 +386,8 @@
 
             $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', function(){
                 MG.preview.instance.onWindowResize();
-                MG.preview.instance.prep(MG.edit.currentRoom);
                 MG.preview.instance.points(MG.edit.currentRoom, MG.edit.currentPoint);
-                MG.preview.instance.changeBackground(MG.edit.getBackgroundUrl());
+                MG.preview.instance.changeBackground(MG.edit.currentRoom, MG.edit.getBackgroundUrl());
                 MG.preview.instance.update();
             });
 

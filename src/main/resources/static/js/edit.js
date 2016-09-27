@@ -81,7 +81,7 @@
             }
         });
 
-        ns.newRoomBtn = $('#newRoom').prop('disabled', true).click(function(){
+        ns.newRoomBtn = $('#newRoom').click(function(){
             var roomId = prompt("New room identifier:");
             if (roomId) {
                 for (i = 0; i < ns.index.json.rooms.length; i++) {

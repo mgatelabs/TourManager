@@ -13,6 +13,7 @@
         camera: undefined,
         scene: undefined,
         renderer: undefined,
+
         lon: 0,
         lat:0,
         phi:0,
@@ -29,9 +30,23 @@
 
         backgroundUrl: '',
 
+        backgroundLoader: undefined,
+
+        background: {
+            failure: false,
+            loaded: false,
+            material: undefined,
+            texture: undefined,
+            width: undefined,
+            height: undefined,
+            mesh: undefined
+        },
+
         init: function(options){
 
             MG.preview.instance = this;
+
+            this.backgroundLoader = new THREE.ImageLoader();
 
             var self = this, i;
 
@@ -42,14 +57,16 @@
 
             this.scene = new THREE.Scene();
 
-            this.geometry = new THREE.SphereBufferGeometry( 1.5, 20, 20 );
-            this.geometry.scale( - 1, 1, 1 );
-            this.material   = new THREE.MeshBasicMaterial( { map: undefined } );
-            this.material.depthWrite = false;
-            this.material.depthTest = false;
-            this.mesh = new THREE.Mesh( this.geometry, this.material );
-            //this.mesh.visible = false;
-            this.scene.add( this.mesh );
+            //this.geometry = MVRS.geom.instances.Plane.gen({}, 1.0, 1.0);
+
+            //this.geometry = new THREE.SphereBufferGeometry( 1.5, 20, 20 );
+            //this.geometry.scale( - 1, 1, 1 );
+            this.background.material = new THREE.MeshBasicMaterial( { } );
+            this.background.material.depthWrite = false;
+            this.background.material.depthTest = false;
+
+            //this.mesh = new THREE.Mesh( this.geometry, this.material );
+            //this.scene.add(this.mesh);
 
             this.icons = [];
             for (i = 0; i < 10; i++) {
@@ -61,7 +78,7 @@
             this.renderer.setSize( this.container.innerWidth(), this.container.innerHeight() );
             this.container.append( this.renderer.domElement );
 
-            $(window).resize(function(){
+            $(window).resize(function() {
                 self.onWindowResize();
             });
 
@@ -83,7 +100,6 @@
                 'previous': this._getAtlasTexture(24),
                 'next': this._getAtlasTexture(23)
             };
-
         },
         _getAtlasTexture: function(index) {
             var texture = new THREE.TextureLoader().load('/static/images/atlas/atlas_' + index + '.png');
@@ -93,7 +109,6 @@
             return texture;
         },
         generateIcon: function(index){
-
             var geometry = new THREE.PlaneGeometry(1, 1);
             var material = new THREE.MeshBasicMaterial( {/*color: 0xffff00, */side: THREE.FrontSide} ); // FrontSide || DoubleSide
             material.depthWrite = false;
@@ -119,7 +134,6 @@
             return [obj1, obj2, plane];
         },
         update: function() {
-
             this.lat = Math.max( - 85, Math.min( 85, this.lat) );
             this.phi = THREE.Math.degToRad( 90 - this.lat);
             this.theta = THREE.Math.degToRad(this.lon);
@@ -131,34 +145,32 @@
             this.camera.lookAt( this.camera.target );
 
             this.renderer.render( this.scene, this.camera );
-
         },
         onWindowResize: function() {
-
             this.camera.aspect = this.container.innerWidth() / this.container.innerHeight();
             this.camera.updateProjectionMatrix();
 
             this.renderer.setSize( this.container.innerWidth(), this.container.innerHeight() );
-
         },
         prep: function(room) {
+            /*
             this.lon = 0;
             this.lat = 0;
             this.phi = 0;
             if (room) {
                 if (room.world && room.world.yaw) {
-                    this.mesh.rotation.x = 0;
-                    this.mesh.rotation.y = this.radians(-room.world.yaw - 0);
-                    this.mesh.rotation.z = 0;
+                    this.background.mesh.rotation.x = 0;
+                    this.background.mesh.rotation.y = this.radians(-room.world.yaw - 0);
+                    this.background.mesh.rotation.z = 0;
                 } else {
-                    this.mesh.rotation.x = 0;
-                    this.mesh.rotation.y = 0;
-                    this.mesh.rotation.z = 0;
+                    this.background.mesh.rotation.x = 0;
+                    this.background.mesh.rotation.y = 0;
+                    this.background.mesh.rotation.z = 0;
                 }
             }
+            */
         },
         points: function(room, point) {
-
             var i;
 
             for (i = 0; i < 10; i++) {
@@ -201,17 +213,71 @@
         radians: function(degrees) {
           return degrees * Math.PI / 180;
         },
-        changeBackground: function(backgroundUrl) {
+        changeBackground: function(room, backgroundUrl) {
             if (backgroundUrl && backgroundUrl != this.backgroundUrl) {
+                var self = this;
+
                 this.backgroundUrl = backgroundUrl;
 
-                var texture = new THREE.TextureLoader().load(backgroundUrl);
-                texture.wrapS = THREE.ClampToEdgeWrapping;
-                texture.wrapT = THREE.ClampToEdgeWrapping;
-                texture.needsUpdate = true;
+                if (this.background.mesh) {
+                    this.scene.remove(this.background.mesh);
+                    this.background.mesh.geometry.dispose();
+                    this.background.mesh.material = undefined;
+                    this.background.mesh = undefined;
+                }
+
+                this.background.failure = false;
+                this.background.loaded = false;
+                this.background.width = -1;
+                this.background.height = -1;
+
+                this.backgroundLoader.load(backgroundUrl, function(image){
+                    var texture = new THREE.Texture(image);
+                    texture.wrapS = THREE.ClampToEdgeWrapping;
+                    texture.wrapT = THREE.ClampToEdgeWrapping;
+                    texture.needsUpdate = true;
+
+                    self.background.texture = texture;
+                    self.background.material.map = texture;
+                    self.background.width = image.width;
+                    self.background.height = image.height;
+                    self.background.loaded = true;
+
+                    var geometry;
+                    switch (room.playback) {
+                        case '2d': {
+                            geometry = MVRS.geom.instances.Plane.gen({}, 1.0, 1.0);
+                        } break;
+                        default: {
+                            geometry = new THREE.SphereBufferGeometry( 1.5, 20, 20 );
+                            geometry.scale( - 1, 1, 1 );
+                        } break;
+                    }
+                    self.background.mesh = new THREE.Mesh(geometry, self.background.material );
+                    self.scene.add(self.background.mesh);
 
 
-                this.material.map = texture;
+                    this.lon = 0;
+                    this.lat = 0;
+                    this.phi = 0;
+                    if (room) {
+                        if (room.world && room.world.yaw) {
+                            self.background.mesh.rotation.x = 0;
+                            self.background.mesh.rotation.y = self.radians(-room.world.yaw - 0);
+                            self.background.mesh.rotation.z = 0;
+                        } else {
+                            self.background.mesh.rotation.x = 0;
+                            self.background.mesh.rotation.y = 0;
+                            self.background.mesh.rotation.z = 0;
+                        }
+                    }
+
+
+                }, function() {}, function() {
+                    self.background.loaded = false;
+                });
+
+
             }
         },
         onDocumentMouseDown: function( event ) {
@@ -235,7 +301,6 @@
         onDocumentMouseUp: function( event ) {
             this.isUserInteracting = false;
         }
-
     });
 
 }());
