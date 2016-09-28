@@ -518,6 +518,9 @@
                 case 'stop': {
                     td.text('Stop Tour');
                 } break;
+                case 'exit': {
+                    td.text('Exit VR');
+                } break;
             }
 
             // Options

@@ -57,16 +57,9 @@
 
             this.scene = new THREE.Scene();
 
-            //this.geometry = MVRS.geom.instances.Plane.gen({}, 1.0, 1.0);
-
-            //this.geometry = new THREE.SphereBufferGeometry( 1.5, 20, 20 );
-            //this.geometry.scale( - 1, 1, 1 );
             this.background.material = new THREE.MeshBasicMaterial( { } );
             this.background.material.depthWrite = false;
             this.background.material.depthTest = false;
-
-            //this.mesh = new THREE.Mesh( this.geometry, this.material );
-            //this.scene.add(this.mesh);
 
             this.icons = [];
             for (i = 0; i < 10; i++) {
@@ -153,22 +146,9 @@
             this.renderer.setSize( this.container.innerWidth(), this.container.innerHeight() );
         },
         prep: function(room) {
-            /*
             this.lon = 0;
             this.lat = 0;
             this.phi = 0;
-            if (room) {
-                if (room.world && room.world.yaw) {
-                    this.background.mesh.rotation.x = 0;
-                    this.background.mesh.rotation.y = this.radians(-room.world.yaw - 0);
-                    this.background.mesh.rotation.z = 0;
-                } else {
-                    this.background.mesh.rotation.x = 0;
-                    this.background.mesh.rotation.y = 0;
-                    this.background.mesh.rotation.z = 0;
-                }
-            }
-            */
         },
         points: function(room, point) {
             var i;
@@ -198,8 +178,8 @@
                     icon[0].visible = true;
 
                     //icon[0].rotation.x = 0;
-                    icon[0].rotation.y = this.radians(-((point.yaw || 0) - 0));
-                    icon[0].rotation.z = this.radians((((point.pitch || 0) - 0)) + 90);
+                    icon[0].rotation.y = THREE.Math.degToRad(-((point.yaw || 0) - 0));
+                    icon[0].rotation.z = THREE.Math.degToRad((((point.pitch || 0) - 0)) + 90);
 
                     icon[1].position.y = -(point.depth || 1.5);
 
@@ -256,21 +236,30 @@
                     self.background.mesh = new THREE.Mesh(geometry, self.background.material );
                     self.scene.add(self.background.mesh);
 
+                    self.lon = 0;
+                    self.lat = 0;
+                    self.phi = 0;
 
-                    this.lon = 0;
-                    this.lat = 0;
-                    this.phi = 0;
+                    var yaw = 180;
+
+                    self.background.mesh.rotation.x = 0;
+                    self.background.mesh.rotation.y = 0;
+                    self.background.mesh.rotation.z = 0;
+
                     if (room) {
                         if (room.world && room.world.yaw) {
+                            yaw = 180 + (room.world.yaw - 0);
+                            console.log(yaw);
                             self.background.mesh.rotation.x = 0;
-                            self.background.mesh.rotation.y = self.radians(-room.world.yaw - 0);
+
                             self.background.mesh.rotation.z = 0;
                         } else {
                             self.background.mesh.rotation.x = 0;
-                            self.background.mesh.rotation.y = 0;
                             self.background.mesh.rotation.z = 0;
                         }
                     }
+
+                    self.background.mesh.rotation.y = THREE.Math.degToRad(yaw);
 
 
                 }, function() {}, function() {
