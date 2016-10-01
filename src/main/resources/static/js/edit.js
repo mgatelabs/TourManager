@@ -157,6 +157,7 @@
         ns.pointSize = $('#pointSize').prop('disabled', true);
         ns.pointTo = $('#pointTo').prop('disabled', true);
         ns.pointRecenter = $('#pointRecenter').prop('disabled', true);
+        ns.pointTimer = $('#pointTimer').prop('disabled', true);
 
         ns.pointRotY = $('#pointRotY').prop('disabled', true);
         ns.pointRotP = $('#pointRotP').prop('disabled', true);
@@ -180,6 +181,7 @@
             if (ns.currentPoint) {
                 ns.currentPoint.type = $(this).val();
                 ns.pointUpdated();
+                ns.updatePointDisplay();
             }
         });
 
@@ -194,6 +196,7 @@
             if (ns.currentPoint) {
                 ns.currentPoint.action = $(this).val();
                 ns.pointUpdated();
+                ns.updatePointDisplay();
             }
         });
 
@@ -215,6 +218,13 @@
             if (ns.currentPoint) {
                 ns.currentPoint.recenter = $(this).val();
                 ns.pointUpdated();
+            }
+        });
+
+        ns.pointTimer.change(function(){
+            if (ns.currentPoint) {
+                ns.currentPoint.timer = $(this).val();
+                //ns.pointUpdated();
             }
         });
 
@@ -575,6 +585,7 @@
         ns.pointSize.prop('disabled', false).val(ns.currentPoint.size || 1.0);
         ns.pointTo.prop('disabled', false).val(ns.currentPoint.to || '');
         ns.pointRecenter.prop('disabled', false).val(ns.currentPoint.recenter || 'false');
+        ns.pointTimer.prop('disabled', false).val(ns.currentPoint.timer || '');
 
         ns.pointRotY.prop('disabled', false).val(ns.currentPoint.yaw || 0);
         ns.pointRotP.prop('disabled', false).val(ns.currentPoint.pitch || 0);
@@ -588,6 +599,7 @@
         ns.pointYrot.prop('disabled', false).val(ns.currentPoint.yrot || 0);
         ns.pointZrot.prop('disabled', false).val(ns.currentPoint.zrot || 0);
 
+        ns.updatePointDisplay();
     };
 
     ns.deSelectPoint = function(){
@@ -603,6 +615,7 @@
         ns.pointSize.prop('disabled', true).val(1.0);
         ns.pointTo.prop('disabled', true).val('');
         ns.pointRecenter.prop('disabled', true).val('false');
+        ns.pointTimer.prop('disabled', true).val('');
 
         ns.pointRotY.prop('disabled', true).val(0);
         ns.pointRotP.prop('disabled', true).val(0);
@@ -616,6 +629,23 @@
         ns.pointYrot.prop('disabled', true).val(0);
         ns.pointZrot.prop('disabled', true).val(0);
     };
+
+    ns.updatePointDisplay = function () {
+
+        ns.pointTo.prop('disabled', ns.pointAction.val() != 'nav');
+
+
+        var rotMode = ns.pointType.val() == 'rot';
+
+        if (rotMode) {
+            $('.rot-based').show();
+            $('.point-based').hide();
+        } else {
+            $('.rot-based').hide();
+            $('.point-based').show();
+        }
+
+    }
 
     ns.movePoint = function(pointIndex) {
 

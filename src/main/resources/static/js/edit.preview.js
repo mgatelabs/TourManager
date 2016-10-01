@@ -91,7 +91,8 @@
                 'left': this._getAtlasTexture(15),
                 'right': this._getAtlasTexture(13),
                 'previous': this._getAtlasTexture(24),
-                'next': this._getAtlasTexture(23)
+                'next': this._getAtlasTexture(23),
+                'hidden': undefined
             };
         },
         _getAtlasTexture: function(index) {
@@ -102,7 +103,7 @@
             return texture;
         },
         generateIcon: function(index){
-            var geometry = new THREE.PlaneGeometry(1, 1);
+            var geometry = new THREE.PlaneGeometry(0.5, 0.5);
             var material = new THREE.MeshBasicMaterial( {/*color: 0xffff00, */side: THREE.FrontSide} ); // FrontSide || DoubleSide
             material.depthWrite = false;
             material.depthTest = false;
@@ -171,7 +172,7 @@
         },
         point: function(point, index) {
             var icon = this.icons[index];
-            if (point) {
+            if (point && point.icon != 'hidden') {
                 icon[2].material.map = this.atlas[point.icon || 'dot'];
                 if (point.type == 'rot') {
                     // Update point 0

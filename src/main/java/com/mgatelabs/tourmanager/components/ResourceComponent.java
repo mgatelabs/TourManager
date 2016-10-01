@@ -34,6 +34,8 @@ public class ResourceComponent {
     public static final Pattern TOUR_IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9-_]+$");
     public static final Pattern TOUR_FULL_PATTERN = Pattern.compile("^[a-z0-9-_]+.tour$");
     public static final Pattern TOUR_FLOAT = Pattern.compile("^[-]{0,1}[0-9]*(\\.[0-9]+){0,1}$");
+    public static final Pattern TOUR_INTEGER = Pattern.compile("^[-]{0,1}[0-9]+$");
+    public static final Pattern TOUR_POSITIVE_INTEGER = Pattern.compile("^[0-9]+$");
 
     @POST
     @Path("/tour/create")
@@ -229,8 +231,8 @@ public class ResourceComponent {
     }
 
     private static final ImmutableSet<String> LIST_POINT_TYPE = ImmutableSet.of("rot", "point");
-    private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next");
-    private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit");
+    private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next", "hidden");
+    private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit", "noop");
     private static final ImmutableSet<String> LIST_TRUE_FALSE = ImmutableSet.of("true", "false");
     private static final ImmutableSet<String> LIST_ROOM_PLAYBACK = ImmutableSet.of("360","360lr","360tb","2d","lr","rl","tb", "180","180lr","180tb","ffd","ffdlr","ffdtb","cube","cubelr","cubetb");
     private static final ImmutableSet<String> ATTRS_FOR_ROT = ImmutableSet.of("yaw", "pitch", "depth", "size");
@@ -340,6 +342,13 @@ public class ResourceComponent {
                                 }
 
                                 {
+                                    String pointTimer = getValueFrom(getNode(point, "timer"));
+                                    if (!isEmptyOrPositiveInteger(pointTimer)) {
+                                        restResponse.addError("Invalid point timer.  Provided timer value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].timer)");
+                                    }
+                                }
+
+                                {
                                     String pointAction = getValueFrom(getNode(point, "action"));
                                     if (StringUtils.isEmpty(pointAction)) {
                                         restResponse.addError("Invalid point action.  Point action is required. @ Path (rooms[" + i + "].points[" + j + "].action)");
@@ -410,6 +419,22 @@ public class ResourceComponent {
             return true;
         } else {
             return TOUR_FLOAT.matcher(value).matches();
+        }
+    }
+
+    private boolean isEmptyOrInteger(@NotNull final String value) {
+        if (StringUtils.isEmpty(value)) {
+            return true;
+        } else {
+            return TOUR_INTEGER.matcher(value).matches();
+        }
+    }
+
+    private boolean isEmptyOrPositiveInteger(@NotNull final String value) {
+        if (StringUtils.isEmpty(value)) {
+            return true;
+        } else {
+            return TOUR_POSITIVE_INTEGER.matcher(value).matches();
         }
     }
 
