@@ -234,6 +234,7 @@ public class ResourceComponent {
     private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next", "hidden");
     private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit", "noop");
     private static final ImmutableSet<String> LIST_TRUE_FALSE = ImmutableSet.of("true", "false");
+    private static final ImmutableSet<String> LIST_TRUE_FALSE_APPLY = ImmutableSet.of("true", "false", "apply");
     private static final ImmutableSet<String> LIST_ROOM_PLAYBACK = ImmutableSet.of("360","360lr","360tb","2d","lr","rl","tb", "180","180lr","180tb","ffd","ffdlr","ffdtb","cube","cubelr","cubetb");
     private static final ImmutableSet<String> ATTRS_FOR_ROT = ImmutableSet.of("yaw", "pitch", "depth", "size");
     private static final ImmutableSet<String> ATTRS_FOR_POINT = ImmutableSet.of("x", "y", "z", "xrot", "yrot", "zrot", "size");
@@ -336,7 +337,7 @@ public class ResourceComponent {
 
                                 {
                                     String pointRecenter = getValueFrom(getNode(point, "recenter"));
-                                    if (!StringUtils.isEmpty(pointRecenter) && !LIST_TRUE_FALSE.contains(pointRecenter)) {
+                                    if (!StringUtils.isEmpty(pointRecenter) && !LIST_TRUE_FALSE_APPLY.contains(pointRecenter)) {
                                         restResponse.addError("Invalid point recenter.  Provided recenter value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].recenter)");
                                     }
                                 }

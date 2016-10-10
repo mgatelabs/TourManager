@@ -44,6 +44,12 @@
                     ns.moveRoom(index + 1);
                     ns.updateRoomList();
                 } break;
+                case 'DELETE': {
+                    if (confirm('Delete room, are you sure?')) {
+                        ns.deleteRoom(index);
+                        ns.updateRoomList();
+                    }
+                } break;
             }
         });
 
@@ -121,6 +127,12 @@
                 case 'DOWN': {
                     ns.movePoint(index + 1);
                     ns.updatePointList();
+                } break;
+                case 'DELETE': {
+                    if (confirm('Delete point, are you sure?')) {
+                        ns.deletePoint(index);
+                        ns.updatePointList();
+                    }
                 } break;
             }
         });
@@ -415,6 +427,7 @@
 
             link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'EDIT').appendTo(td);
 
+
             link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'skip').appendTo(td);
             if (i > 0) {
                 link.attr('mode', 'UP');
@@ -429,6 +442,7 @@
                 link.prop('disabled', true);
             }
 
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
         }
     };
 
@@ -483,12 +497,14 @@
     };
 
     ns.moveRoom = function(roomIndex) {
-
         ns.deSelectRoom();
-
         var toRemove = ns.index.json.rooms.splice(roomIndex, 1)[0];
-
         ns.index.json.rooms.splice(roomIndex - 1, 0, toRemove);
+    };
+
+    ns.deleteRoom = function(roomIndex) {
+        ns.deSelectRoom();
+        ns.index.json.rooms.splice(roomIndex, 1)[0];
     };
 
     /**
@@ -552,6 +568,7 @@
                 link.prop('disabled', true);
             }
 
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
         }
     };
 
@@ -654,6 +671,11 @@
         var toRemove = ns.currentRoom.points.splice(pointIndex, 1)[0];
 
         ns.currentRoom.points.splice(pointIndex - 1, 0, toRemove);
+    };
+
+    ns.deletePoint = function(pointIndex) {
+        ns.deSelectPoint();
+        ns.currentRoom.points.splice(pointIndex, 1)[0];
     };
 
     ns.pointUpdated = function() {
