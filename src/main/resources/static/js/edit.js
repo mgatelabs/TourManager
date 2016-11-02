@@ -56,6 +56,7 @@
         // Room Editor
         ns.roomId = $('#roomId').prop('disabled', true);
         ns.roomName = $('#roomName').prop('disabled', true);
+        ns.roomPreview = $('#roomPreview').prop('disabled', true);
         ns.roomContent = $('#roomContent').prop('disabled', true);
         ns.roomPlaybackType = $('#roomPlaybackType').prop('disabled', true);
         ns.roomRotation = $('#roomRotation').prop('disabled', true);
@@ -63,6 +64,12 @@
         ns.roomName.change(function(){
             if (ns.currentRoom) {
                 ns.currentRoom.title = $(this).val();
+            }
+        });
+
+        ns.roomPreview.change(function(){
+            if (ns.currentRoom) {
+                ns.currentRoom.preview = $(this).val();
             }
         });
 
@@ -168,6 +175,7 @@
         ns.pointAction = $('#pointAction').prop('disabled', true);
         ns.pointSize = $('#pointSize').prop('disabled', true);
         ns.pointTo = $('#pointTo').prop('disabled', true);
+        ns.pointContent = $('#pointContent').prop('disabled', true);
         ns.pointRecenter = $('#pointRecenter').prop('disabled', true);
         ns.pointTimer = $('#pointTimer').prop('disabled', true);
 
@@ -226,6 +234,12 @@
             }
         });
 
+        ns.pointContent.change(function(){
+            if (ns.currentPoint) {
+                ns.currentPoint.content = $(this).val();
+            }
+        });
+
         ns.pointRecenter.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.recenter = $(this).val();
@@ -236,7 +250,6 @@
         ns.pointTimer.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.timer = $(this).val();
-                //ns.pointUpdated();
             }
         });
 
@@ -448,10 +461,29 @@
 
     ns.updateRoomContentList = function() {
         var i, item, option;
+        // Room Content
         ns.roomContent.empty();
         for (i = 0; i < ns.media.length; i++) {
             item = ns.media[i];
             option = $('<option></option>').appendTo(ns.roomContent);
+            option.text(item.json.display || item.name);
+            option.attr('value',item.name);
+        }
+        // Room Preview
+        ns.roomPreview.empty();
+        $('<option value="">None</option>').appendTo(ns.roomPreview);
+        for (i = 0; i < ns.media.length; i++) {
+            item = ns.media[i];
+            option = $('<option></option>').appendTo(ns.roomPreview);
+            option.text(item.json.display || item.name);
+            option.attr('value',item.name);
+        }
+        // Point Content
+        ns.pointContent.empty();
+        $('<option value="">None</option>').appendTo(ns.pointContent);
+        for (i = 0; i < ns.media.length; i++) {
+            item = ns.media[i];
+            option = $('<option></option>').appendTo(ns.pointContent);
             option.text(item.json.display || item.name);
             option.attr('value',item.name);
         }
@@ -472,6 +504,7 @@
 
         ns.roomId.val(ns.currentRoom.id);
         ns.roomName.prop('disabled', false).val(ns.currentRoom.title);
+        ns.roomPreview.prop('disabled', false).val(ns.currentRoom.preview || '');
         ns.roomContent.prop('disabled', false).val(ns.currentRoom.content);
         ns.roomPlaybackType.prop('disabled', false).val(ns.currentRoom.playback || '360');
         ns.roomRotation.prop('disabled', false).val(ns.currentRoom.world.yaw || '0');
@@ -483,14 +516,13 @@
 
         ns.currentRoom = undefined;
 
-        //ns.newRoomBtn.prop('disabled', true);
-
         ns.deSelectPoint();
 
         $('#pointEditLink').addClass('disabled');
 
         ns.roomId.val('');
         ns.roomName.prop('disabled', true).val('');
+        ns.roomPreview.prop('disabled', true).val([]);
         ns.roomContent.prop('disabled', true).val([]);
         ns.roomPlaybackType.prop('disabled', true).val('360');
         ns.roomRotation.prop('disabled', true).val('0');
@@ -533,6 +565,9 @@
                 case 'point': {
                     td.text('Point');
                 } break;
+                case 'action': {
+                    td.text('Action');
+                } break;
             }
 
             // Action
@@ -546,6 +581,9 @@
                 } break;
                 case 'exit': {
                     td.text('Exit VR');
+                } break;
+                case 'play': {
+                    td.text('Play (' + (item.content || 'Unknown') + ')');
                 } break;
             }
 
@@ -598,9 +636,10 @@
         ns.pointTitle.prop('disabled', false).val(ns.currentPoint.title || 'Undefined');
         ns.pointType.prop('disabled', false).val(ns.currentPoint.type || 'rot');
         ns.pointIcon.prop('disabled', false).val(ns.currentPoint.icon || 'dot');
-        ns.pointAction.prop('disabled', false).val(ns.currentPoint.action || 'nav');
+        ns.pointAction.prop('disabled', false).val(ns.currentPoint.action || 'noop');
         ns.pointSize.prop('disabled', false).val(ns.currentPoint.size || 1.0);
         ns.pointTo.prop('disabled', false).val(ns.currentPoint.to || '');
+        ns.pointContent.prop('disabled', false).val(ns.currentPoint.content || '');
         ns.pointRecenter.prop('disabled', false).val(ns.currentPoint.recenter || 'false');
         ns.pointTimer.prop('disabled', false).val(ns.currentPoint.timer || '');
 
@@ -628,9 +667,10 @@
         ns.pointTitle.prop('disabled', true).val('');
         ns.pointType.prop('disabled', true).val('rot');
         ns.pointIcon.prop('disabled', true).val('dot');
-        ns.pointAction.prop('disabled', true).val('nav');
+        ns.pointAction.prop('disabled', true).val('noop');
         ns.pointSize.prop('disabled', true).val(1.0);
         ns.pointTo.prop('disabled', true).val('');
+        ns.pointContent.prop('disabled', true).val('');
         ns.pointRecenter.prop('disabled', true).val('false');
         ns.pointTimer.prop('disabled', true).val('');
 
@@ -650,18 +690,20 @@
     ns.updatePointDisplay = function () {
 
         ns.pointTo.prop('disabled', ns.pointAction.val() != 'nav');
+        ns.pointContent.prop('disabled', ns.pointAction.val() != 'play');
 
+        var rotMode = ns.pointType.val();
 
-        var rotMode = ns.pointType.val() == 'rot';
-
-        if (rotMode) {
+        if (rotMode == 'rot') {
             $('.rot-based').show();
             $('.point-based').hide();
-        } else {
+        } else if (rotMode == 'point') {
             $('.rot-based').hide();
             $('.point-based').show();
+        } else if (rotMode == 'action') {
+            $('.rot-based').hide();
+            $('.point-based').hide();
         }
-
     }
 
     ns.movePoint = function(pointIndex) {

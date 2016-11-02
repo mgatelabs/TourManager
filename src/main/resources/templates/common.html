@@ -119,6 +119,11 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="roomPreview">Preview</label>
+                                    <select class="form-control" id="roomPreview"></select>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="roomContent">Content</label>
                                     <select class="form-control" id="roomContent"></select>
                                 </div>
@@ -224,6 +229,7 @@
                                     <select class="form-control" id="pointType">
                                         <option value="rot">Rotation (Default)</option>
                                         <option value="point">Point (Advanced)</option>
+                                        <option value="action">Action (Script)</option>
                                     </select>
                                 </div>
 
@@ -233,6 +239,7 @@
                                         <option value="nav">Navigate</option>
                                         <option value="stop">Stop Tour</option>
                                         <option value="exit">Exit VR</option>
+                                        <option value="play">Play</option>
                                         <option value="noop">No Operation</option>
                                     </select>
                                 </div>
@@ -240,6 +247,11 @@
                                 <div class="form-group">
                                     <label for="pointTo">To</label>
                                     <select class="form-control" id="pointTo"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="pointContent">Content</label>
+                                    <select class="form-control" id="pointContent"></select>
                                 </div>
 
                                 <div class="form-group">
@@ -255,7 +267,6 @@
                                         <option value="right">Right</option>
                                         <option value="previous">Previous</option>
                                         <option value="next">Next</option>
-                                        <option value="hidden">Hidden</option>
                                     </select>
                                 </div>
 
@@ -268,7 +279,6 @@
                                     </select>
 
                                     <div class="well well-sm" style="margin-top:4px;">
-
                                             True: World will re-center<br/>
                                             False: World will stay the same<br/>
                                             Apply: Point yaw will apply to next room

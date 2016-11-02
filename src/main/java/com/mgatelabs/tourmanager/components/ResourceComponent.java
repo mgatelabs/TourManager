@@ -198,7 +198,7 @@ public class ResourceComponent {
             @Override
             public boolean accept(File pathname) {
                 if (pathname.exists() || pathname.isFile())
-                    return (pathname.getName().matches("[a-zA-Z0-9-_]+\\.(png|jpg)"));
+                    return (pathname.getName().matches("[a-zA-Z0-9-_~]+\\.(png|jpg|mp4)"));
                 return false;
             }
         })) {
@@ -230,15 +230,14 @@ public class ResourceComponent {
         return tourInfo;
     }
 
-    private static final ImmutableSet<String> LIST_POINT_TYPE = ImmutableSet.of("rot", "point");
+    private static final ImmutableSet<String> LIST_POINT_TYPE = ImmutableSet.of("rot", "point", "action");
     private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next", "hidden");
-    private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit", "noop");
+    private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit", "play", "noop");
     private static final ImmutableSet<String> LIST_TRUE_FALSE = ImmutableSet.of("true", "false");
     private static final ImmutableSet<String> LIST_TRUE_FALSE_APPLY = ImmutableSet.of("true", "false", "apply");
     private static final ImmutableSet<String> LIST_ROOM_PLAYBACK = ImmutableSet.of("360","360lr","360tb","2d","lr","rl","tb", "180","180lr","180tb","ffd","ffdlr","ffdtb","cube","cubelr","cubetb");
     private static final ImmutableSet<String> ATTRS_FOR_ROT = ImmutableSet.of("yaw", "pitch", "depth", "size");
     private static final ImmutableSet<String> ATTRS_FOR_POINT = ImmutableSet.of("x", "y", "z", "xrot", "yrot", "zrot", "size");
-
 
     @POST
     @Path("/{tour:[a-z0-9-_]+\\.tour}/info")
@@ -279,6 +278,11 @@ public class ResourceComponent {
                         if (StringUtils.isEmpty(getValueFrom(roomTitle))) {
                             restResponse.addError("Invalid room title.  Room title is required. @ Path (rooms[" + i + "].title)");
                         }
+                        // Previews are not required
+                        //JsonNode roomPreview = getNode(room, "preview");
+                        //if (StringUtils.isEmpty(getValueFrom(roomPreview))) {
+                        //    restResponse.addError("Invalid room preview.  Room preview is required. @ Path (rooms[" + i + "].preview)");
+                        //}
                         JsonNode roomContent = getNode(room, "content");
                         if (StringUtils.isEmpty(getValueFrom(roomContent))) {
                             restResponse.addError("Invalid room content.  Room content is required. @ Path (rooms[" + i + "].content)");
@@ -308,6 +312,8 @@ public class ResourceComponent {
                                     }
                                 }
 
+                                boolean iconRequired = true;
+
                                 {
                                     String pointType = getValueFrom(getNode(point, "type"));
                                     if (StringUtils.isEmpty(pointType)) {
@@ -315,9 +321,16 @@ public class ResourceComponent {
                                     } else if (!LIST_POINT_TYPE.contains(pointType)) {
                                         restResponse.addError("Invalid point type.  Provided type value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].type)");
                                     } else {
-                                        Set<String> checkAgainst = pointType.equals("rot") ? ATTRS_FOR_ROT : ATTRS_FOR_POINT;
-
-                                        for (String attributeName : checkAgainst) {
+                                        final Set<String> checkAgainst;
+                                        if (pointType.equals("rot")) {
+                                            checkAgainst = ATTRS_FOR_ROT;
+                                        } else if (pointType.equals("point")) {
+                                            checkAgainst = ATTRS_FOR_POINT;
+                                        } else {
+                                            iconRequired = false;
+                                            checkAgainst = ImmutableSet.of();
+                                        }
+                                         for (String attributeName : checkAgainst) {
                                             JsonNode pointValue = getNode(point, attributeName);
                                             if (!isEmptyOrFloat(getValueFrom(pointValue))) {
                                                 restResponse.addError("Invalid point " + attributeName + ".  Provided " + attributeName + " value was not a valid decimal.  Acceptable formats include ## or #.# or .##. @ Path (rooms[" + i + "].points[" + j + "]." + attributeName + ")");
@@ -326,7 +339,7 @@ public class ResourceComponent {
                                     }
                                 }
 
-                                {
+                                if (iconRequired) {
                                     String pointIcon = getValueFrom(getNode(point, "icon"));
                                     if (StringUtils.isEmpty(pointIcon)) {
                                         restResponse.addError("Invalid point icon.  Point icon is required. @ Path (rooms[" + i + "].points[" + j + "].icon)");
@@ -360,6 +373,11 @@ public class ResourceComponent {
                                             String pointTo = getValueFrom(getNode(point, "to"));
                                             if (StringUtils.isEmpty(pointTo)) {
                                                 restResponse.addError("Invalid point to.  Point to is required when action is nav. @ Path (rooms[" + i + "].points[" + j + "].to)");
+                                            }
+                                        } else if (pointAction.equals("play")) {
+                                            String pointContent = getValueFrom(getNode(point, "content"));
+                                            if (StringUtils.isEmpty(pointContent)) {
+                                                restResponse.addError("Invalid point content.  Point content is required when action is play. @ Path (rooms[" + i + "].points[" + j + "].content)");
                                             }
                                         }
                                     }
