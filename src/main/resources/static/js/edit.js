@@ -91,6 +91,7 @@
                     ns.currentRoom.world = {};
                 }
                 ns.currentRoom.world.yaw = $(this).val();
+                MG.preview.instance.updateRoomOrientation(ns.currentRoom);
             }
         });
 
@@ -176,6 +177,7 @@
         ns.pointSize = $('#pointSize').prop('disabled', true);
         ns.pointTo = $('#pointTo').prop('disabled', true);
         ns.pointContent = $('#pointContent').prop('disabled', true);
+        ns.pointFlow = $('#pointFlow').prop('disabled', true);
         ns.pointRecenter = $('#pointRecenter').prop('disabled', true);
         ns.pointTimer = $('#pointTimer').prop('disabled', true);
 
@@ -237,6 +239,12 @@
         ns.pointContent.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.content = $(this).val();
+            }
+        });
+
+        ns.pointFlow.change(function(){
+            if (ns.currentPoint) {
+                ns.currentPoint.flow = $(this).val();
             }
         });
 
@@ -640,6 +648,7 @@
         ns.pointSize.prop('disabled', false).val(ns.currentPoint.size || 1.0);
         ns.pointTo.prop('disabled', false).val(ns.currentPoint.to || '');
         ns.pointContent.prop('disabled', false).val(ns.currentPoint.content || '');
+        ns.pointFlow.prop('disabled', false).val(ns.currentPoint.flow || 'stop');
         ns.pointRecenter.prop('disabled', false).val(ns.currentPoint.recenter || 'false');
         ns.pointTimer.prop('disabled', false).val(ns.currentPoint.timer || '');
 
@@ -671,6 +680,7 @@
         ns.pointSize.prop('disabled', true).val(1.0);
         ns.pointTo.prop('disabled', true).val('');
         ns.pointContent.prop('disabled', true).val('');
+        ns.pointFlow.prop('disabled', true).val('stop');
         ns.pointRecenter.prop('disabled', true).val('false');
         ns.pointTimer.prop('disabled', true).val('');
 

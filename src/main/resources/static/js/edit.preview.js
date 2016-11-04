@@ -195,8 +195,8 @@
           return degrees * Math.PI / 180;
         },
         changeBackground: function(room, backgroundUrl) {
+            var self = this;
             if (backgroundUrl && backgroundUrl != this.backgroundUrl) {
-                var self = this;
 
                 this.backgroundUrl = backgroundUrl;
 
@@ -237,37 +237,48 @@
                     self.background.mesh = new THREE.Mesh(geometry, self.background.material );
                     self.scene.add(self.background.mesh);
 
-                    self.lon = 0;
-                    self.lat = 0;
-                    self.phi = 0;
-
-                    var yaw = 180;
-
-                    self.background.mesh.rotation.x = 0;
-                    self.background.mesh.rotation.y = 0;
-                    self.background.mesh.rotation.z = 0;
-
-                    if (room) {
-                        if (room.world && room.world.yaw) {
-                            yaw = 180 + (room.world.yaw - 0);
-                            console.log(yaw);
-                            self.background.mesh.rotation.x = 0;
-
-                            self.background.mesh.rotation.z = 0;
-                        } else {
-                            self.background.mesh.rotation.x = 0;
-                            self.background.mesh.rotation.z = 0;
-                        }
-                    }
-
-                    self.background.mesh.rotation.y = THREE.Math.degToRad(yaw);
-
+                    self.updateRoomOrientation(room);
 
                 }, function() {}, function() {
                     self.background.loaded = false;
                 });
 
 
+            } else if (self.background) {
+
+                this.updateRoomOrientation(room);
+
+            }
+        },
+        updateRoomOrientation: function(room){
+            var self = this;
+            if (self.background) {
+                self.lon = 0;
+                self.lat = 0;
+                self.phi = 0;
+
+                var yaw = 180;
+
+                self.background.mesh.rotation.x = 0;
+                self.background.mesh.rotation.y = 0;
+                self.background.mesh.rotation.z = 0;
+
+                if (room) {
+                    if (room.world && room.world.yaw) {
+                        yaw = 180 + (room.world.yaw - 0);
+                        //console.log(yaw);
+                        self.background.mesh.rotation.x = 0;
+
+                        self.background.mesh.rotation.z = 0;
+                    } else {
+                        self.background.mesh.rotation.x = 0;
+                        self.background.mesh.rotation.z = 0;
+                    }
+                }
+
+                self.background.mesh.rotation.y = THREE.Math.degToRad(yaw);
+
+                self.update();
             }
         },
         onDocumentMouseDown: function( event ) {

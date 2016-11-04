@@ -198,7 +198,7 @@ public class ResourceComponent {
             @Override
             public boolean accept(File pathname) {
                 if (pathname.exists() || pathname.isFile())
-                    return (pathname.getName().matches("[a-zA-Z0-9-_~]+\\.(png|jpg|mp4)"));
+                    return (pathname.getName().matches("[a-zA-Z0-9-_~]+\\.(png|jpg|mp4|sbs|m4v|mov)"));
                 return false;
             }
         })) {
@@ -234,6 +234,7 @@ public class ResourceComponent {
     private static final ImmutableSet<String> LIST_POINT_ICON = ImmutableSet.of("dot", "eye", "exit", "stop", "up", "down", "left", "right", "previous", "next", "hidden");
     private static final ImmutableSet<String> LIST_POINT_ACTION = ImmutableSet.of("nav", "stop", "exit", "play", "noop");
     private static final ImmutableSet<String> LIST_TRUE_FALSE = ImmutableSet.of("true", "false");
+    private static final ImmutableSet<String> LIST_FLOW = ImmutableSet.of("stop", "next", "repeat");
     private static final ImmutableSet<String> LIST_TRUE_FALSE_APPLY = ImmutableSet.of("true", "false", "apply");
     private static final ImmutableSet<String> LIST_ROOM_PLAYBACK = ImmutableSet.of("360","360lr","360tb","2d","lr","rl","tb", "180","180lr","180tb","ffd","ffdlr","ffdtb","cube","cubelr","cubetb");
     private static final ImmutableSet<String> ATTRS_FOR_ROT = ImmutableSet.of("yaw", "pitch", "depth", "size");
@@ -378,6 +379,10 @@ public class ResourceComponent {
                                             String pointContent = getValueFrom(getNode(point, "content"));
                                             if (StringUtils.isEmpty(pointContent)) {
                                                 restResponse.addError("Invalid point content.  Point content is required when action is play. @ Path (rooms[" + i + "].points[" + j + "].content)");
+                                            }
+                                            String pointFlow = getValueFrom(getNode(point, "flow"));
+                                            if (!StringUtils.isEmpty(pointFlow) && !LIST_FLOW.contains(pointFlow)) {
+                                                restResponse.addError("Invalid point flow.  Provided flow value was not recognized. @ Path (rooms[" + i + "].points[" + j + "].flow)");
                                             }
                                         }
                                     }
