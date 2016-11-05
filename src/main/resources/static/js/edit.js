@@ -4,9 +4,104 @@
     MG.edit = MG.edit || {};
     var ns = MG.edit;
 
+    ns.presets = {
+        Plane: [{
+          name: 'Distance',
+          key: 'di',
+          type: 'I',
+          min: 10,
+          max: 100,
+          def: 25
+        }, {
+          name: 'Offset X',
+          key: 'offx',
+          type: 'F',
+          min: -25,
+          max: 25,
+          def: 0,
+          step: 0.5
+        }, {
+          name: 'Offset Y',
+          key: 'offy',
+          type: 'F',
+          min: -25,
+          max: 25,
+          def: 0,
+          step: 0.5
+        }, {
+          name: 'Width',
+          key: 'wi',
+          type: 'I',
+          min: 10,
+          max: 100,
+          def: 50
+        }, {
+          name: 'Height',
+          key: 'he',
+          type: 'I',
+          min: 10,
+          max: 100,
+          def: 50
+        }, {
+          name: 'Scale',
+          key: 'sc',
+          type: 'F',
+          min: 1,
+          max: 10,
+          def: 1,
+          step: 0.25
+        }, ],
+        // Skip these for now, will implement later
+        Curved: [
+
+        ],
+        Sphere: [{
+            name: 'Vertical Columns',
+            key: 'cols',
+            type: 'I',
+            min: 8,
+            max: 64,
+            def: 48
+          }, {
+            name: 'Horizontal Rows',
+            key: 'rows',
+            type: 'I',
+            min: 8,
+            max: 64,
+            def: 48
+          }, {
+            name: 'Width',
+            key: 'wi',
+            type: 'F',
+            min: 10,
+            max: 100,
+            def: 10
+          }, {
+            name: 'Height',
+            key: 'he',
+            type: 'F',
+            min: 10,
+            max: 100,
+            def: 10
+          }, {
+            name: 'Depth',
+            key: 'de',
+            type: 'F',
+            min: 10,
+            max: 100,
+            def: 10
+          }
+        ],
+        Dome: [
+
+        ]
+    };
+
     ns.currentRoom = {};
     ns.currentPoint = {};
+    ns.currentPreset = {};
     ns.roomMap = {};
+    ns.presetMap = {};
 
     ns.newRoomBtn = undefined,
 
@@ -177,6 +272,7 @@
         ns.pointSize = $('#pointSize').prop('disabled', true);
         ns.pointTo = $('#pointTo').prop('disabled', true);
         ns.pointContent = $('#pointContent').prop('disabled', true);
+        ns.pointPreset = $('#pointPreset').prop('disabled', true);
         ns.pointFlow = $('#pointFlow').prop('disabled', true);
         ns.pointRecenter = $('#pointRecenter').prop('disabled', true);
         ns.pointTimer = $('#pointTimer').prop('disabled', true);
@@ -239,6 +335,12 @@
         ns.pointContent.change(function(){
             if (ns.currentPoint) {
                 ns.currentPoint.content = $(this).val();
+            }
+        });
+
+        ns.pointPreset.change(function(){
+            if (ns.currentPoint) {
+                ns.currentPoint.preset = $(this).val();
             }
         });
 
@@ -333,6 +435,124 @@
         // anchors
         ns.listBody = $('#listTable tbody');
 
+        // Preset List
+
+        // Point List
+        ns.presetBody = $('#presetTable tbody');
+
+        ns.presetBody.on('click', 'tr td button[mode]', function(){
+            var ref = $(this), index = ref.attr('index') - 0, mode = ref.attr('mode');
+            switch (mode) {
+                case 'EDIT': {
+                    ns.selectPreset(index);
+                } break;
+                case 'UP': {
+                    ns.movePreset(index);
+                    ns.updatePresetList();
+                } break;
+                case 'DOWN': {
+                    ns.movePreset(index + 1);
+                    ns.updatePresetList();
+                } break;
+                case 'DELETE': {
+                    if (confirm('Delete preset, are you sure?')) {
+                        ns.deletePreset(index);
+                        ns.updatePresetList();
+                    }
+                } break;
+            }
+        });
+
+        $('#newPreset').click(function(){
+
+            var presetId = prompt("New preset identifier:");
+            if (presetId) {
+                for (i = 0; i < ns.index.json.presets.length; i++) {
+                    item = ns.index.json.presets[i];
+                    if (item.id == roomId) {
+                        alert('Preset with matching identifier already exists');
+                        return;
+                    }
+                }
+                ns.deSelectRoom();
+                ns.deSelectPoint();
+                ns.deSelectPreset();
+
+                ns.index.json.presets.push({id: presetId, proj:'Plane', mode:'2d', fill:'adapt', ipd:'std', flip:'off', filter: 'off', settings: {}});
+
+                ns.updatePresetList();
+                ns.updatePresetToList();
+                ns.selectPreset(ns.index.json.presets.length - 1);
+            }
+        });
+
+        // Preset Editor
+        ns.presetId = $('#presetId').prop('disabled', true);
+        ns.presetProj = $('#presetProj').prop('disabled', true);
+        ns.presetMode = $('#presetMode').prop('disabled', true);
+        ns.presetFill = $('#presetFill').prop('disabled', true);
+        ns.presetIpd = $('#presetIpd').prop('disabled', true);
+        ns.presetFlip = $('#presetFlip').prop('disabled', true);
+        ns.presetFilter = $('#presetFilter').prop('disabled', true);
+
+        ns.presetProj.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.proj = $(this).val();
+                ns.currentPreset.settings = {};
+
+                var i, proj, item;
+                proj = ns.presets[ns.currentPreset.proj] || [];
+                for (i = 0; i < proj.length; i++) {
+                    item = proj[i];
+                    ns.currentPreset.settings[item.key] = item.def - 0;
+                }
+
+                ns.updatePresetList();
+                ns.updatePresetAttributes();
+            }
+        });
+
+        ns.presetMode.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.mode = $(this).val();
+            }
+        });
+
+        ns.presetFill.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.fill = $(this).val();
+            }
+        });
+
+        ns.presetIpd.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.ipd = $(this).val();
+            }
+        });
+
+        ns.presetFlip.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.flip = $(this).val();
+            }
+        });
+
+        ns.presetFilter.change(function(){
+            if (ns.currentPreset) {
+                ns.currentPreset.filter = $(this).val();
+            }
+        });
+
+        $('#presetAttributes').on('change', 'input', function(){
+            if (ns.currentPreset) {
+            var ele = $(this), key = ele.attr('key');
+                if (key) {
+                    ns.currentPreset.settings[key] = ele.val();
+                }
+            }
+        })
+
+        //
+
         // load
         ns.load();
     };
@@ -375,7 +595,8 @@
                         version:{major:1, minor:0},
                         tool:'tourman',
                         title:'Untitled',
-                        rooms: []
+                        rooms: [],
+                        presets: []
                     }
                 }));
 
@@ -431,6 +652,8 @@
         ns.updateRoomContentList();
 
         ns.updatePointToList();
+
+        ns.updatePresetToList();
     }
 
     /**
@@ -648,6 +871,7 @@
         ns.pointSize.prop('disabled', false).val(ns.currentPoint.size || 1.0);
         ns.pointTo.prop('disabled', false).val(ns.currentPoint.to || '');
         ns.pointContent.prop('disabled', false).val(ns.currentPoint.content || '');
+        ns.pointPreset.prop('disabled', false).val(ns.currentPoint.preset || '');
         ns.pointFlow.prop('disabled', false).val(ns.currentPoint.flow || 'stop');
         ns.pointRecenter.prop('disabled', false).val(ns.currentPoint.recenter || 'false');
         ns.pointTimer.prop('disabled', false).val(ns.currentPoint.timer || '');
@@ -680,6 +904,7 @@
         ns.pointSize.prop('disabled', true).val(1.0);
         ns.pointTo.prop('disabled', true).val('');
         ns.pointContent.prop('disabled', true).val('');
+        ns.pointPreset.prop('disabled', true).val('');
         ns.pointFlow.prop('disabled', true).val('stop');
         ns.pointRecenter.prop('disabled', true).val('false');
         ns.pointTimer.prop('disabled', true).val('');
@@ -701,6 +926,7 @@
 
         ns.pointTo.prop('disabled', ns.pointAction.val() != 'nav');
         ns.pointContent.prop('disabled', ns.pointAction.val() != 'play');
+        ns.pointPreset.prop('disabled', ns.pointAction.val() != 'play');
 
         var rotMode = ns.pointType.val();
 
@@ -733,6 +959,130 @@
     ns.pointUpdated = function() {
         MG.preview.instance.points(MG.edit.currentRoom, MG.edit.currentPoint);
         MG.preview.instance.update();
+    }
+
+    /**
+     * Preset Operations
+     */
+
+    ns.updatePresetList = function() {
+        var i, item, tr, td, link;
+        ns.presetBody.empty();
+        for (i = 0; i < ns.index.json.presets.length; i++) {
+            item = ns.index.json.presets[i];
+            tr = $('<tr></tr>').appendTo(ns.presetBody);
+            $('<td></td>').text(item.id).appendTo(tr);
+            $('<td></td>').text(item.proj).appendTo(tr);
+            td = $('<td></td>').appendTo(tr);
+
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'EDIT').appendTo(td);
+
+
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'skip').appendTo(td);
+            if (i > 0) {
+                link.attr('mode', 'UP');
+            } else {
+                link.prop('disabled', true);
+            }
+
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'skip').appendTo(td);
+            if (i < ns.index.json.rooms.length - 1) {
+                link.attr('mode', 'DOWN');
+            } else {
+                link.prop('disabled', true);
+            }
+
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
+        }
+    };
+
+    ns.selectPreset = function(presetIndex){
+
+        ns.currentPreset = ns.index.json.presets[presetIndex];
+
+        //ns.deSelectPoint();
+
+        //$('#pointEditLink').addClass('disabled');
+
+        // Integrity
+        if (!ns.currentPreset.settings) {
+            ns.currentPreset.settings = {};
+        }
+
+        ns.presetId.val(ns.currentPreset.id);
+        ns.presetProj.prop('disabled', false).val(ns.currentPreset.proj || 'Plane');
+        ns.presetMode.prop('disabled', false).val(ns.currentPreset.mode || '2d');
+        ns.presetFill.prop('disabled', false).val(ns.currentPreset.fill || 'adapt');
+        ns.presetIpd.prop('disabled', false).val(ns.currentPreset.ipd || 'std');
+        ns.presetFlip.prop('disabled', false).val(ns.currentPreset.flip || 'off');
+        ns.presetFilter.prop('disabled', false).val(ns.currentPreset.filter || 'off');
+
+        ns.updatePresetAttributes();
+    };
+
+    ns.deSelectPreset = function(){
+
+        ns.currentPreset = undefined;
+
+        //ns.deSelectPoint();
+
+        //$('#pointEditLink').addClass('disabled');
+
+        ns.presetId.val('');
+        ns.presetProj.prop('disabled', true).val('Plane');
+        ns.presetMode.prop('disabled', true).val('2d');
+        ns.presetFill.prop('disabled', true).val('adapt');
+        ns.presetIpd.prop('disabled', true).val('std');
+        ns.presetFlip.prop('disabled', true).val('off');
+        ns.presetFilter.prop('disabled', true).val('off');
+
+        ns.updatePresetAttributes();
+    };
+
+    ns.movePreset = function(presetIndex) {
+        ns.deSelectPreset();
+        var toRemove = ns.index.json.presets.splice(presetIndex, 1)[0];
+        ns.index.json.presets.splice(presetIndex - 1, 0, toRemove);
+    };
+
+    ns.deletePreset = function(presetIndex) {
+        ns.deSelectPreset();
+        ns.index.json.presets.splice(presetIndex, 1)[0];
+    };
+
+    ns.updatePresetToList = function() {
+
+        ns.presetMap = {};
+
+        var i, item, option;
+        ns.pointPreset.empty();
+        option = $('<option></option>').appendTo(ns.pointTo);
+        option.attr('value','');
+        for (i = 0; i < ns.index.json.presets.length; i++) {
+            item = ns.index.json.presets[i];
+            option = $('<option></option>').appendTo(ns.pointPreset);
+            option.text(item.id + ' - ' + item.proj);
+            option.attr('value',item.id);
+            ns.presetMap[item.id] = i;
+        }
+    };
+
+    ns.updatePresetAttributes = function(){
+
+        var presetAttributes = $('#presetAttributes').empty(), fg, i, lab, inp, item, attributes;
+
+        if (ns.currentPreset) {
+
+            attributes = ns.presets[ns.currentPreset.proj || 'Plane'];
+
+            for (i = 0; i < attributes.length; i++) {
+                item = attributes[i];
+                fg = $('<div class="form-group preset-based"></div>').appendTo(presetAttributes);
+                lab = $('<label></label>').attr('for', 'preset_' + item.key ).text(item.name).appendTo(fg);
+                inp = $('<input type="number" class="form-control presetBased"/>').attr('id', 'preset_' + item.key).attr('key', item.key).attr('min', item.min).attr('max', item.max).val(ns.currentPreset.settings[item.key] || item.def).attr('step', item.step || 1).appendTo(fg);
+            }
+
+        }
     }
 
     /**

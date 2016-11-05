@@ -53,6 +53,7 @@
             <li role="presentation" class="active"><a href="#tourInfo" aria-controls="tourInfo" role="tab" data-toggle="tab">Information</a></li>
             <li role="presentation" id="roomEditLink"><a href="#roomEditor" aria-controls="roomEditor" role="tab" data-toggle="tab">Room Editor</a></li>
             <li role="presentation" id="pointEditLink"><a href="#pointEditor" aria-controls="pointEditor" role="tab" data-toggle="tab">Point Editor</a></li>
+            <li role="presentation" id="presetEditLink"><a href="#presetEditor" aria-controls="presetEditor" role="tab" data-toggle="tab">Preset Editor</a></li>
             <li role="presentation"><a href="#mediaEditor" aria-controls="mediaEditor" role="tab" data-toggle="tab">Images</a></li>
         </ul>
         <!-- Tab panes -->
@@ -69,37 +70,34 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="roomEditor">
 
-                <div class="panel panel-default" style="margin-top:1em;">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Rooms</h3>
-                    </div>
-                    <div class="panel-body">
-
-                        <table class="table table-condensed table-striped" id="roomTable">
-                            <thead>
-                            <tr>
-                                <th>Name (Identifier)</th>
-                                <th>Options</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-primary" id="newRoom">New Room</button>
-                        </div>
-
-                    </div>
-                </div>
-
-
-
-
-
                 <div class="row" style="margin-top:1em;">
 
+                    <div class="col-md-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Rooms</h3>
+                            </div>
+                            <div class="panel-body">
+
+                                <table class="table table-condensed table-striped" id="roomTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Name (Identifier)</th>
+                                        <th>Options</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+
+                                <div class="btn-group" role="group" aria-label="...">
+                                    <button type="button" class="btn btn-primary" id="newRoom">New Room</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-4">
 
                         <div class="panel panel-default">
@@ -124,14 +122,15 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="roomContent">Content</label>
+                                    <label for="roomContent">Background</label>
                                     <select class="form-control" id="roomContent"></select>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="roomPlaybackType">Playback Type</label>
+                                    <label for="roomPlaybackType">Background Type</label>
                                     <select class="form-control" id="roomPlaybackType">
-                                        <option value="360">2D 360 (Default)</option>
+                                        <option value="360">360 (Default)</option>
+                                        <!--
                                         <option value="360lr">3D 360 Left Right</option>
                                         <option value="360tb">3D 360 Top Bottom</option>
                                         <option value="2d">2D Flat</option>
@@ -144,9 +143,12 @@
                                         <option value="ffd">2D Front Full Dome</option>
                                         <option value="ffdlr">3D Front Full Dome Left Right</option>
                                         <option value="ffdtb">3D Front Full Dome Top Bottom</option>
-                                        <option value="cube">2D Cube</option>
+                                        -->
+                                        <option value="cube">Cube (Not Ready)</option>
+                                        <!--
                                         <option value="cubelr">3D Cube Left Right</option>
                                         <option value="cubetb">3D Cube Top Bottom</option>
+                                        -->
                                     </select>
                                 </div>
 
@@ -155,6 +157,7 @@
 
                     </div>
                 </div>
+
 
 
 
@@ -238,6 +241,11 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="pointPreset">Preset</label>
+                                    <select class="form-control" id="pointPreset"></select>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="pointFlow">Flow</label>
                                     <select class="form-control" id="pointFlow">
                                         <option value="stop">Stop</option>
@@ -245,6 +253,8 @@
                                         <option value="repeat">Repeat</option>
                                     </select>
                                 </div>
+
+
 
                                 <div class="form-group">
                                     <label for="pointIcon">Icon</label>
@@ -390,6 +400,135 @@
 
 
             </div>
+
+            <!--
+                Preset Editor
+            -->
+
+            <div role="tabpanel" class="tab-pane" id="presetEditor">
+
+                <div class="panel panel-default" style="margin-top:1em;">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Presets</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <table class="table table-condensed table-striped" id="presetTable">
+                            <thead>
+                            <tr>
+                                <th>Name (Identifier)</th>
+                                <th>Type</th>
+                                <th>Options</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+
+                        <div class="btn-group" role="group" aria-label="...">
+                            <button type="button" class="btn btn-primary" id="newPreset">New Preset</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:1em;">
+
+                    <div class="col-md-4">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Preset</h3>
+                            </div>
+                            <div class="panel-body">
+
+                                <div class="form-group">
+                                    <label for="presetId">Id</label>
+                                    <input type="text" class="form-control" id="presetId" placeholder="Identifier"/>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetProj">Type</label>
+                                    <select class="form-control" id="presetProj">
+                                        <option value="Plane">Plane</option>
+                                        <option value="Sphere">Sphere</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetMode">Mode</label>
+                                    <select class="form-control" id="presetMode">
+                                        <option value="2d">2D</option>
+                                        <option value="sbs">3D Left / Right</option>
+                                        <option value="ovr">3D Top / Bottom</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetFill">Fill</label>
+                                    <select class="form-control" id="presetFill">
+                                        <option value="adapt">Adaptive (Standard)</option>
+                                        <option value="stretch">Stretch</option>
+                                        <option value="fit">Fit (Deprecated)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetIpd">IPD</label>
+                                    <select class="form-control" id="presetIpd">
+                                        <option value="std">Standard</option>
+                                        <option value="zero">Zero</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetFlip">Flip</label>
+                                    <select class="form-control" id="presetFlip">
+                                        <option value="off">Off (Standard)</option>
+                                        <option value="on">On (Flipped)</option>
+                                        <option value="2d">Force 2D</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="presetFilter">Filter</label>
+                                    <select class="form-control" id="presetFilter">
+                                        <option value="off">Off (None)</option>
+                                        <option value="redcyan">3D Red/Cyan</option>
+                                        <option value="redblue">3D Red/Blue</option>
+                                        <option value="redgreen">3D Red/Green</option>
+                                    </select>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-8">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Attributes</h3>
+                            </div>
+                            <div class="panel-body" id="presetAttributes">
+
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!--
+                Media Editor
+            -->
 
             <div role="tabpanel" class="tab-pane" id="mediaEditor">
 
