@@ -50,7 +50,23 @@
           max: 10,
           def: 1,
           step: 0.25
-        }, ],
+        }, {
+           name: 'Max Adapt Width',
+           key: 'maw',
+           type: 'F',
+           min: 0.10,
+           max: 1.00,
+           def: 1.0,
+           step: 0.01
+         }, {
+            name: 'Max Adapt Height',
+            key: 'mah',
+            type: 'F',
+            min: 0.10,
+            max: 1.00,
+            def: 1.0,
+            step: 0.01
+          }],
         // Skip these for now, will implement later
         Curved: [
 
@@ -249,7 +265,7 @@
                 return;
             }
             ns.deSelectPoint();
-            ns.currentRoom.points.push({title:'Untitled', type:'rot', action:'stop', icon:'dot', recenter:'false',});
+            ns.currentRoom.points.push({title:'Untitled', type:'rot', action:'noop', icon:'dot', recenter:'false',});
             ns.updatePointList();
             ns.selectPoint(ns.currentRoom.points.length - 1);
             $('#tabList a[href="#pointEditor"]').tab('show');
@@ -441,7 +457,7 @@
         ns.presetBody = $('#presetTable tbody');
 
         ns.presetBody.on('click', 'tr td button[mode]', function(){
-            var ref = $(this), index = ref.attr('index') - 0, mode = ref.attr('mode');
+            var ref = $(this), index = ref.attr('index') - 0, mode = ref.attr('mode'), dat;
             switch (mode) {
                 case 'EDIT': {
                     ns.selectPreset(index);
@@ -460,6 +476,29 @@
                         ns.updatePresetList();
                     }
                 } break;
+                case 'COPY': {
+                    var presetId = prompt("Preset identifier:");
+                    if (presetId) {
+                        for (i = 0; i < ns.index.json.presets.length; i++) {
+                            item = ns.index.json.presets[i];
+                            if (item.name == presetId) {
+                                alert('Preset with matching identifier already exists');
+                                return;
+                            }
+                        }
+                        ns.deSelectRoom();
+                        ns.deSelectPoint();
+                        ns.deSelectPreset();
+
+                        dat = $.extend(true, {}, ns.index.json.presets[index], {name: presetId});
+
+                        ns.index.json.presets.push(dat);
+
+                        ns.updatePresetList();
+                        ns.updatePresetToList();
+                        ns.selectPreset(ns.index.json.presets.length - 1);
+                    }
+                } break;
             }
         });
 
@@ -469,7 +508,7 @@
             if (presetId) {
                 for (i = 0; i < ns.index.json.presets.length; i++) {
                     item = ns.index.json.presets[i];
-                    if (item.id == roomId) {
+                    if (item.name == presetId) {
                         alert('Preset with matching identifier already exists');
                         return;
                     }
@@ -478,7 +517,7 @@
                 ns.deSelectPoint();
                 ns.deSelectPreset();
 
-                ns.index.json.presets.push({id: presetId, proj:'Plane', mode:'2d', fill:'adapt', ipd:'std', flip:'off', filter: 'off', settings: {}});
+                ns.index.json.presets.push({name: presetId, proj:'Plane', mode:'2d', fill:'adapt', ipd:'std', flip:'off', filter: 'off', settings: {}});
 
                 ns.updatePresetList();
                 ns.updatePresetToList();
@@ -652,6 +691,10 @@
         ns.updateRoomContentList();
 
         ns.updatePointToList();
+
+        // Presets
+
+        ns.updatePresetList();
 
         ns.updatePresetToList();
     }
@@ -937,7 +980,7 @@
             $('.rot-based').hide();
             $('.point-based').show();
         } else if (rotMode == 'action') {
-            $('.rot-based').hide();
+            $('.rot-based').show();
             $('.point-based').hide();
         }
     }
@@ -971,7 +1014,7 @@
         for (i = 0; i < ns.index.json.presets.length; i++) {
             item = ns.index.json.presets[i];
             tr = $('<tr></tr>').appendTo(ns.presetBody);
-            $('<td></td>').text(item.id).appendTo(tr);
+            $('<td></td>').text(item.name).appendTo(tr);
             $('<td></td>').text(item.proj).appendTo(tr);
             td = $('<td></td>').appendTo(tr);
 
@@ -992,7 +1035,9 @@
                 link.prop('disabled', true);
             }
 
-            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs" title="Delete"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'DELETE').appendTo(td);
+
+            link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs" title="Copy"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'COPY').appendTo(td);
         }
     };
 
@@ -1009,7 +1054,7 @@
             ns.currentPreset.settings = {};
         }
 
-        ns.presetId.val(ns.currentPreset.id);
+        ns.presetId.val(ns.currentPreset.name);
         ns.presetProj.prop('disabled', false).val(ns.currentPreset.proj || 'Plane');
         ns.presetMode.prop('disabled', false).val(ns.currentPreset.mode || '2d');
         ns.presetFill.prop('disabled', false).val(ns.currentPreset.fill || 'adapt');
@@ -1061,8 +1106,8 @@
         for (i = 0; i < ns.index.json.presets.length; i++) {
             item = ns.index.json.presets[i];
             option = $('<option></option>').appendTo(ns.pointPreset);
-            option.text(item.id + ' - ' + item.proj);
-            option.attr('value',item.id);
+            option.text(item.name + ' - ' + item.proj);
+            option.attr('value',item.name);
             ns.presetMap[item.id] = i;
         }
     };
