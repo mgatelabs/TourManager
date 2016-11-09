@@ -158,39 +158,6 @@
                     </div>
                 </div>
 
-
-
-
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Points</h3>
-                    </div>
-                    <div class="panel-body">
-
-                        <table class="table table-condensed table-striped" id="pointTable">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Action</th>
-                                <th>Options</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-primary" id="newPoint">New Point</button>
-
-                            <button type="button" class="btn btn-info" id="previewPoints">Preview</button>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
 
             <div role="tabpanel" class="tab-pane" id="pointEditor">
@@ -310,6 +277,52 @@
                             </div>
                             <div class="panel-body" id="previewPanel" style="height:480px;margin:0;padding:0;">
 
+
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Info</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p>
+                                    <b>Yaw</b>: Red = 0&deg;, Green = 90&deg;, Blue = 180&deg;, White = -90&deg;
+                                </p>
+                                <p>
+                                    <b>Pitch</b>: Up = +&deg;, Down = -&deg;;
+                                </p>
+                                <p>
+                                    <b>Depth</b>: 1.5 = Standard Depth;
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Points</h3>
+                            </div>
+                            <div class="panel-body">
+
+                                <table class="table table-condensed table-striped" id="pointTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
+                                        <th>Options</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+
+                                <div class="btn-group" role="group" aria-label="...">
+                                    <button type="button" class="btn btn-primary" id="newPoint">New Point</button>
+
+                                    <button type="button" class="btn btn-info" id="previewPoints">Preview</button>
+                                </div>
 
                             </div>
                         </div>
@@ -555,13 +568,15 @@
 
             new MG.preview.Preview({container:$('#previewPanel')});
 
-            $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', function(){
+            MG.preview.pointUpdate = function() {
                 MG.preview.instance.onWindowResize();
                 MG.preview.instance.prep();
                 MG.preview.instance.points(MG.edit.currentRoom, MG.edit.currentPoint);
                 MG.preview.instance.changeBackground(MG.edit.currentRoom, MG.edit.getBackgroundUrl());
                 MG.preview.instance.update();
-            });
+            };
+
+            $('#tabList a[href="#pointEditor"]').on('shown.bs.tab', MG.preview.pointUpdate);
 
             $('#tabList a[href="#roomEditor"]').on('shown.bs.tab', function(){
                 MG.edit.updateRoomList();

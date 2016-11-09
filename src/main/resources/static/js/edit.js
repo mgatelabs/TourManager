@@ -114,7 +114,9 @@
     };
 
     ns.currentRoom = {};
+    ns.currentRoomIndex = -1;
     ns.currentPoint = {};
+    ns.currentPointIndex = -1;
     ns.currentPreset = {};
     ns.roomMap = {};
     ns.presetMap = {};
@@ -237,7 +239,7 @@
             switch (mode) {
                 case 'EDIT': {
                     ns.selectPoint(index);
-                    $('#tabList a[href="#pointEditor"]').tab('show');
+                    MG.preview.pointUpdate();
                 } break;
                 case 'UP': {
                     ns.movePoint(index);
@@ -268,7 +270,8 @@
             ns.currentRoom.points.push({title:'Untitled', type:'rot', action:'noop', icon:'dot', recenter:'false',});
             ns.updatePointList();
             ns.selectPoint(ns.currentRoom.points.length - 1);
-            $('#tabList a[href="#pointEditor"]').tab('show');
+            MG.preview.pointUpdate();
+            //$('#tabList a[href="#pointEditor"]').tab('show');
         });
 
         $('#previewPoints').click(function(){
@@ -709,6 +712,10 @@
         for (i = 0; i < ns.index.json.rooms.length; i++) {
             item = ns.index.json.rooms[i];
             tr = $('<tr></tr>').appendTo(ns.roomBody);
+            tr.attr('room', i);
+            if (i == ns.currentRoomIndex) {
+                tr.addClass('selected');
+            }
             $('<td></td>').text(item.title + ' (' + item.id + ')').appendTo(tr);
             td = $('<td></td>').appendTo(tr);
 
@@ -765,7 +772,11 @@
 
     ns.selectRoom = function(roomIndex){
 
+        ns.currentRoomIndex = roomIndex;
+
         ns.currentRoom = ns.index.json.rooms[roomIndex];
+
+        ns.roomBody.find('tr[room]').removeClass('selected').filter('[room='+roomIndex+']').addClass('selected');
 
         ns.deSelectPoint();
 
@@ -787,6 +798,10 @@
     };
 
     ns.deSelectRoom = function(){
+
+        ns.currentRoomIndex = -1;
+
+        ns.roomBody.find('tr[room]').removeClass('selected');
 
         ns.currentRoom = undefined;
 
@@ -826,6 +841,10 @@
         for (i = 0; i < ns.currentRoom.points.length; i++) {
             item = ns.currentRoom.points[i];
             tr = $('<tr></tr>').appendTo(ns.pointBody);
+            tr.attr('point', i);
+            if (i == ns.currentPointIndex) {
+                tr.addClass('selected');
+            }
 
             // Title
             $('<td></td>').text(item.title).appendTo(tr);
@@ -903,7 +922,11 @@
 
     ns.selectPoint = function(pointIndex){
 
+        ns.currentPointIndex = pointIndex;
+
         ns.currentPoint = ns.currentRoom.points[pointIndex];
+
+        //ns.pointBody.find('tr[point]').removeClass('selected').filter('[point='+pointIndex+']').addClass('selected');
 
         $('#pointEditLink').removeClass('disabled');
 
@@ -932,9 +955,15 @@
         ns.pointZrot.prop('disabled', false).val(ns.currentPoint.zrot || 0);
 
         ns.updatePointDisplay();
+
+        ns.updatePointList();
     };
 
     ns.deSelectPoint = function(){
+
+        ns.currentPointIndex = -1;
+
+        ns.pointBody.find('tr[point]').removeClass('selected');
 
         ns.currentPoint = undefined;
 

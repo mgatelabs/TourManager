@@ -39,3 +39,7 @@ body > .container {
 code {
   font-size: 80%;
 }
+
+tr.selected {
+    background-color: #ddd !important;
+}

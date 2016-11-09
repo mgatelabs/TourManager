@@ -94,6 +94,42 @@
                 'next': this._getAtlasTexture(23),
                 'hidden': undefined
             };
+
+            // Add lines
+
+            var lineMaterial, lineGeometry, line;
+
+            lineMaterial = new THREE.LineBasicMaterial({color: 0xff0000, opacity: 1.0});
+            lineGeometry = new THREE.Geometry();
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, 0)); // Forward? Down Right
+            lineGeometry.vertices.push(new THREE.Vector3(3, -1.5, 0));
+            line = new THREE.Line(lineGeometry, lineMaterial);
+            line.renderOrder = 1001;
+            this.scene.add(line);
+
+            lineMaterial = new THREE.LineBasicMaterial({color: 0x00ff00, opacity: 1.0});
+            lineGeometry = new THREE.Geometry();
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, 0)); // Forward? Down Right
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, 3));
+            line = new THREE.Line(lineGeometry, lineMaterial);
+            line.renderOrder = 1002;
+            this.scene.add(line);
+
+            lineMaterial = new THREE.LineBasicMaterial({color: 0x0000ff, opacity: 1.0});
+            lineGeometry = new THREE.Geometry();
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, 0)); // Forward? Down Right
+            lineGeometry.vertices.push(new THREE.Vector3(-3, -1.5, 0));
+            line = new THREE.Line(lineGeometry, lineMaterial);
+            line.renderOrder = 1003;
+            this.scene.add(line);
+
+            lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff, opacity: 1.0});
+            lineGeometry = new THREE.Geometry();
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, 0)); // Forward? Down Right
+            lineGeometry.vertices.push(new THREE.Vector3(0, -1.5, -3));
+            line = new THREE.Line(lineGeometry, lineMaterial);
+            line.renderOrder = 1004;
+            this.scene.add(line);
         },
         _getAtlasTexture: function(index) {
             var texture = new THREE.TextureLoader().load('/static/images/atlas/atlas_' + index + '.png');
