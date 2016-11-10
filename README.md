@@ -50,15 +50,15 @@ This is very basic at the moment, it only supports loading in the *.tour folders
         {
           id: 'unique id',
           title: 'Display name',
-          playback: '360' || '360lr' || '360tb' || '2d' || 'lr' || 'rl' || '180' || '180lr' || '180tb',
-          content: 'filename',
+          playback: '360' || 'cube',
+          content: 'filename', // Name nust be [a-z0-9_-]+\.(jpg|png|sbs)
           world: {
             yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
           },
           points: [
             {
                 title: 'Display name',
-                type: 'rot' || 'point',
+                type: 'rot' || 'point' || 'action',
                 action: 'nav' || 'exit' || 'stop',
                 to: 'room id', // when action == 'nav'
                 recenter: true || false, // true to reset view
@@ -78,3 +78,38 @@ This is very basic at the moment, it only supports loading in the *.tour folders
       ]
     }
 
+### World Attributes
+- version: Object, used to validate before attempting to read
+- tool: The application used to make the tour
+- title: Name of tour, not shown
+- rooms: Array of Room.  First item is starting room
+
+### Room Attributes
+
+- id: The 'unique id' used by points to jump around
+- title: The room's name,
+- playback: How the content is formatted.  Either '360' || 'cube'.
+- content: The background filename.  Name must have format [a-z0-9_-]+\.(jpg|png|sbs)
+- world: Object used to adjust the backgrounds rotation
+
+### Point Attributes
+
+- title: Text to display,
+- type: What kind of point. 'rot' = rotational based. 'point' = point in space. 'action' = non visible action
+- flow: What to do after this point finishes it's action.  Next = go to next point.  Stop, repeat = Loop again (for videos)
+- action: 'nav' || 'exit' || 'stop' || 'play' || 'noop'
+- content: A file to show when play action is specified. Must have format [a-z0-9_-]+\.(jpg|png|sbs|mpg|mp4|mov)
+- to: 'room id', // when action == 'nav'
+- recenter: 'true' || 'false' || 'apply',
+
+- yaw: FLOAT, // -180 - 180.  Left = -.  0 will default.
+- pitch: FLOAT, // when type == 'rot'. -90 - 90. Up = +.  0 will default.
+- depth: FLOAT, // when type == 'rot'. 1.5 - 10. 1.5 will default.
+- size: FLOAT, // when type == 'rot'. 1.0 - 10.  1.0 will default.
+
+- x: FLOAT, // when type == 'point'.
+- y: FLOAT, // when type == 'point'.
+- z: FLOAT, // when type == 'point'.
+- xrot: FLOAT, // when type == 'point'.
+- yrot: FLOAT, // when type == 'point'.
+- zrot: FLOAT // when type == 'point'.
