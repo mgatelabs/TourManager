@@ -198,7 +198,7 @@ public class ResourceComponent {
             @Override
             public boolean accept(File pathname) {
                 if (pathname.exists() || pathname.isFile())
-                    return (pathname.getName().matches("[a-zA-Z0-9-_~]+\\.(png|jpg|mp4|sbs|m4v|mov)"));
+                    return (pathname.getName().matches("[a-zA-Z0-9-_~]+\\.(png|jpg|jpeg|mp4|sbs|m4v|mov|mp3|stream|mpo)"));
                 return false;
             }
         })) {

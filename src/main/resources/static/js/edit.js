@@ -262,8 +262,8 @@
             if (!ns.currentRoom) {
                 alert('Please select a room first');
                 return;
-            } else if (ns.currentRoom.points.length >= 10) {
-                alert('Maximum point limit reached.  A room may only have 10 points.');
+            } else if (ns.currentRoom.points.length >= 20) {
+                alert('Maximum point limit reached.  A room may only have 20 points.');
                 return;
             }
             ns.deSelectPoint();
@@ -271,7 +271,6 @@
             ns.updatePointList();
             ns.selectPoint(ns.currentRoom.points.length - 1);
             MG.preview.pointUpdate();
-            //$('#tabList a[href="#pointEditor"]').tab('show');
         });
 
         $('#previewPoints').click(function(){
