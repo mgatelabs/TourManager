@@ -32,6 +32,12 @@
 
         backgroundLoader: undefined,
 
+        screen: {
+            material: undefined,
+            mesh: undefined,
+            object: undefined
+        },
+
         background: {
             failure: false,
             loaded: false,
@@ -60,6 +66,10 @@
             this.background.material = new THREE.MeshBasicMaterial( { } );
             this.background.material.depthWrite = false;
             this.background.material.depthTest = false;
+
+            this.screen.material = new THREE.MeshBasicMaterial( { } );
+            this.screen.material.depthWrite = false;
+            this.screen.material.depthTest = false;
 
             this.icons = [];
             for (i = 0; i < 10; i++) {
@@ -203,11 +213,12 @@
                     this.point(i < room.points.length ? room.points[i] : undefined, i);
                 }
             } else {
-                this.point(point, 0);
+                this.point(point, 0, true);
             }
         },
-        point: function(point, index) {
+        point: function(point, index, single) {
             var icon = this.icons[index];
+
             if (point && point.icon != 'hidden') {
                 icon[2].material.map = this.atlas[point.icon || 'dot'];
                 if (point.type == 'rot') {
@@ -223,8 +234,27 @@
                 } else {
                     icon[0].visible = false;
                 }
+
             } else {
               icon[0].visible = false;
+          }
+
+          if (this.screen.mesh) {
+            this.scene.remove(this.screen.mesh);
+            this.screen.mesh = undefined;
+          }
+
+          if (single && point.preset) {
+            var preset = MG.edit.findPreset(point.preset), geometry, definition = MVRS.geom.instances[preset.proj];
+            if (definition) {
+                geometry = definition.gen(preset.settings, 1.0, 1.0);
+                this.screen.mesh = new THREE.Mesh(geometry, this.screen.material );
+                this.screen.mesh.renderOrder = 500;
+
+                this.screen.mesh.rotation.y = THREE.Math.degToRad(-((point.yaw || 0) - 0));
+
+                this.scene.add(this.screen.mesh);
+            }
           }
         },
         radians: function(degrees) {

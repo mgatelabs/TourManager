@@ -527,6 +527,26 @@
             }
         });
 
+        $('#previousRoom').click(function(){
+            if (ns.currentRoom) {
+                var newIndex = ns.currentRoomIndex - 1;
+                if (newIndex > 0) {
+                    ns.selectRoom(newIndex);
+                    MG.preview.pointUpdate();
+                }
+            }
+        });
+
+        $('#nextRoom').click(function(){
+            if (ns.currentRoom) {
+                var newIndex = ns.currentRoomIndex + 1;
+                if (newIndex < ns.index.json.rooms.length) {
+                    ns.selectRoom(newIndex);
+                    MG.preview.pointUpdate();
+                }
+            }
+        });
+
         // Preset Editor
         ns.presetId = $('#presetId').prop('disabled', true);
         ns.presetProj = $('#presetProj').prop('disabled', true);
@@ -716,6 +736,7 @@
                 tr.addClass('selected');
             }
             $('<td></td>').text(item.title + ' (' + item.id + ')').appendTo(tr);
+            $('<td></td>').text(item.content).appendTo(tr);
             td = $('<td></td>').appendTo(tr);
 
             link = $('<button type="button" style="margin-right:4px;" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>').attr('index', i).attr('mode', 'EDIT').appendTo(td);
@@ -1092,6 +1113,18 @@
 
         ns.updatePresetAttributes();
     };
+
+    ns.findPreset = function(presetId) {
+        var i, p;
+
+        for (i = 0; i < ns.index.json.presets.length; i++) {
+            p = ns.index.json.presets[i];
+            if (p.name == presetId) {
+                return p;
+            }
+        }
+        return {};
+    },
 
     ns.deSelectPreset = function(){
 

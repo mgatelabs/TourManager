@@ -56,10 +56,18 @@
         this.defaults.push({key:'wi', name:'Width', value: 50});
         this.defaults.push({key:'he', name:'Height', value: 50});
         this.defaults.push({key:'sc', name:'Scale', value: 1.0});
+
+        this.defaults.push({key:'maw', name:'Max Adapt Width', value: 1.0});
+        this.defaults.push({key:'mah', name:'Max Adapt Height', value: 1.0});
     },
 
     MVRS.geom.Plane.prototype.gen = function(options, widthRatio, heightRatio) {
-
+        if (options.maw) {
+            widthRatio = options.maw - 0.0;
+        }
+        if (options.mah) {
+            heightRatio = options.mah - 0.0;
+        }
         options = this.merge(options);
 
         var geom = new THREE.Geometry(), distance = options.di - 0, distancex = options.offx - 0, distancey = options.offy - 0, width = options.wi - 0, height = options.he - 0, scale = options.sc - 0, halfWidth, halfHeight;
