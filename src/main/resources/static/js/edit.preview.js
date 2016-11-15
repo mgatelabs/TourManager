@@ -251,7 +251,9 @@
                 this.screen.mesh = new THREE.Mesh(geometry, this.screen.material );
                 this.screen.mesh.renderOrder = 500;
 
-                this.screen.mesh.rotation.y = THREE.Math.degToRad(-((point.yaw || 0) - 0));
+                if (point.recenter && point.recenter == 'apply') {
+                    this.screen.mesh.rotation.y = THREE.Math.degToRad(-((point.yaw || 0) - 0));
+                }
 
                 this.scene.add(this.screen.mesh);
             }
