@@ -1,3 +1,5 @@
+This is outdated, you should use DesktopTourManager instead.
+
 # TourManager
 A embedded webapp for editing *.tour files for Mobile VR Station
 
